@@ -1,7 +1,7 @@
 import unittest
 from lexer import create_lexer
 
-class MyTestCase(unittest.TestCase):
+class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
         input_string = '5 + 3'
         tokens = self.get_tokens(input_string)
@@ -27,3 +27,5 @@ class MyTestCase(unittest.TestCase):
             result.append(token)
         return result
 
+if __name__ == '__main__':
+    unittest.main()
