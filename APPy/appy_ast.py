@@ -2,15 +2,13 @@ from collections import namedtuple
 
 __author__ = 'alangpierce'
 
-class Expression:
+class BinaryOperator(namedtuple('BinaryOperator',
+                                ['operator', 'left', 'right'])):
     pass
 
-class BinaryOperator(Expression):
-    def __init__(self, operator, left, right):
-        self.operator = operator
-        self.left = left
-        self.right = right
+class Literal(namedtuple('Literal', ['value'])):
+    pass
 
-class Literal(Expression):
-    def __init__(self, value):
-        self.value = value
+# Currently just an int
+class Value(namedtuple('Value', ['value'])):
+    pass
