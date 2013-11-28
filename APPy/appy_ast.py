@@ -4,10 +4,13 @@ __author__ = 'alangpierce'
 
 class BinaryOperator(namedtuple('BinaryOperator',
                                 ['operator', 'left', 'right'])):
-    pass
+    def pretty_print(self):
+        return '(' + self.left.pretty_print() + self.operator +\
+               self.right.pretty_print() + ')'
 
 class Literal(namedtuple('Literal', ['value'])):
-    pass
+    def pretty_print(self):
+        return str(self.value)
 
 # Currently just an int
 class Value(namedtuple('Value', ['value'])):

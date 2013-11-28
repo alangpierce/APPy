@@ -3,9 +3,19 @@ from ply import lex
 tokens = (
     'NUMBER',
     'PLUS',
+    'MINUS',
+    'TIMES',
+    'DIVIDEDBY',
+    'LPAREN',
+    'RPAREN',
 )
 
 t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDEDBY = r'/'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
 
 def t_NUMBER(t):
     r'\d+'
