@@ -2,14 +2,27 @@ from appy_ast import Value
 
 
 def evaluate_expression(expression):
-    return globals()['evaluate_' + expression.__class__.__name__](expression)
+    try:
+        method = globals()['evaluate_' + expression.__class__.__name__]
+    except KeyError as e:
+        raise NotImplementedError(
+            'Missing handler for expression ' + str(expression))
+    return method(expression)
+
+
+BINARY_OPERATORS = {
+    '+': lambda a, b: a + b,
+    '-': lambda a, b: a - b,
+    '*': lambda a, b: a * b,
+    '/': lambda a, b: a / b,
+}
 
 
 def evaluate_BinaryOperator(binop):
-    if binop.operator == '+':
-        return Value(evaluate_expression(binop.left).value + \
-                     evaluate_expression(binop.right).value)
-    raise SyntaxError
+    func = BINARY_OPERATORS[binop.operator]
+    left_value = evaluate_expression(binop.left).value
+    right_value = evaluate_expression(binop.right).value
+    return Value(func(left_value, right_value))
 
 
 def evaluate_Literal(literal):

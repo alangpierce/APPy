@@ -19,6 +19,14 @@ class ParserTest(unittest.TestCase):
                     BinaryOperator('*', Literal(5), Literal(6))),
                 BinaryOperator('/', Literal(4), Literal(2))))
 
+    def test_parens(self):
+        self.assert_ast(
+            '3 * (1 + 2)',
+            BinaryOperator('*',
+                Literal(3),
+                BinaryOperator('+', Literal(1), Literal(2))))
+
+
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)
         self.assertEqual(expected_ast, actual_ast,
