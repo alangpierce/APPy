@@ -36,8 +36,9 @@ def evaluate_BinaryOperator(binop):
     try:
         func = function_by_types[(left_value.type, right_value.type)]
     except KeyError:
-        raise TypeError('unsupported operand type(s) for ' + binop.operator +
-            ": '" + left_value.type + "' and '" + right_value.type + "'")
+        raise TypeError(
+            'unsupported operand type(s) for ' + binop.operator + ": '" +
+            left_value.type + "' and '" + right_value.type + "'")
     (result_type, result_value) = func(left_value.value, right_value.value)
     return Value(result_type, result_value)
 

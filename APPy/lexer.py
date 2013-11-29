@@ -11,15 +11,13 @@ tokens = (
     'LPAREN',
     'RPAREN',
     'STRING',
+    'NEWLINE',
 )
 
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDEDBY = r'/'
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-
 
 def t_NUMBER(t):
     r'\d+'
@@ -79,7 +77,31 @@ def t_STRING(t):
     return t
 
 
-t_ignore = ' \t\n'
+def t_LPAREN(t):
+    r'\('
+    t.lexer.paren_nesting_level += 1
+    return t
+
+def t_RPAREN(t):
+    r'\)'
+    if t.lexer.paren_nesting_level <= 0:
+        raise SyntaxError("Unmatched ')'")
+    t.lexer.paren_nesting_level -= 1
+    return t
+
+def t_NEWLINE(t):
+    r'\n'
+    if (t.lexer.paren_nesting_level == 0 and
+            t.lexer.bracket_nesting_level == 0 and
+            t.lexer.brace_nesting_level == 0):
+        return t
+    # else ignore the token
+
+
+t_ignore_ESCAPED_NEWLINE = r'\\\n'
+
+
+t_ignore = ' \t'
 
 
 def t_error(t):
@@ -87,4 +109,8 @@ def t_error(t):
 
 
 def create_lexer():
-    return lex.lex()
+    lexer = lex.lex()
+    lexer.paren_nesting_level = 0
+    lexer.bracket_nesting_level = 0
+    lexer.brace_nesting_level = 0
+    return lexer

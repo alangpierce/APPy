@@ -11,6 +11,7 @@ lparen = ('LPAREN', '(')
 rparen = ('RPAREN', ')')
 def string(s):
     return ('STRING', s)
+newline = ('NEWLINE', '\n')
 
 class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
@@ -51,6 +52,24 @@ class LexerTest(unittest.TestCase):
         self.assert_tokens(
             r'r"abc\n"',
             [string(r'abc\n')])
+
+    def test_newline(self):
+        self.assert_tokens(
+            '5 + 5\n' +
+            '1 + 2',
+            [num(5), plus, num(5), newline, num(1), plus, num(2)])
+
+    def test_newline_inside_parens(self):
+        self.assert_tokens(
+            '(5 + 5\n' +
+            '1 + 2)',
+            [lparen, num(5), plus, num(5), num(1), plus, num(2), rparen])
+
+    def test_escaped_newline(self):
+        self.assert_tokens(
+            '5 + 5\\\n' +
+            '1 + 2',
+            [num(5), plus, num(5), num(1), plus, num(2)])
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)
