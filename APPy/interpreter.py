@@ -11,19 +11,29 @@ def evaluate_expression(expression):
 
 
 BINARY_OPERATORS = {
-    '+': lambda a, b: a + b,
-    '-': lambda a, b: a - b,
-    '*': lambda a, b: a * b,
-    '/': lambda a, b: a / b,
+    '+': {
+        ('int', 'int'): lambda a, b: ('int', a + b),
+    },
+    '-': {
+        ('int', 'int'): lambda a, b: ('int', a - b),
+    },
+    '*': {
+        ('int', 'int'): lambda a, b: ('int', a * b),
+    },
+    '/': {
+        ('int', 'int'): lambda a, b: ('int', a / b),
+    }
 }
 
 
 def evaluate_BinaryOperator(binop):
-    func = BINARY_OPERATORS[binop.operator]
-    left_value = evaluate_expression(binop.left).value
-    right_value = evaluate_expression(binop.right).value
-    return Value(func(left_value, right_value))
+    function_by_types = BINARY_OPERATORS[binop.operator]
+    left_value = evaluate_expression(binop.left)
+    right_value = evaluate_expression(binop.right)
+    func = function_by_types[(left_value.type, right_value.type)]
+    (result_type, result_value) = func(left_value.value, right_value.value)
+    return Value(result_type, result_value)
 
 
 def evaluate_Literal(literal):
-    return Value(literal.value)
+    return literal.value
