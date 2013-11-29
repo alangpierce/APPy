@@ -8,7 +8,7 @@ def int_literal(int):
     return Literal(Value('int', int))
 
 def string_literal(string):
-    return Literal(Value('string', string))
+    return Literal(Value('str', string))
 
 class ParserTest(unittest.TestCase):
     def test_basic_parsing(self):

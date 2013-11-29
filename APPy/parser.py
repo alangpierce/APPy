@@ -31,7 +31,7 @@ def p_int_literal(p):
 
 def p_string_literal(p):
     'expression : STRING'
-    p[0] = Literal(Value('string', p[1]))
+    p[0] = Literal(Value('str', p[1]))
 
 
 def p_error(p):
