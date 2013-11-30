@@ -1,8 +1,5 @@
 from collections import namedtuple
 
-__author__ = 'alangpierce'
-
-
 class BinaryOperator(namedtuple('BinaryOperator',
                                 ['operator', 'left', 'right'])):
     def pretty_print(self):
