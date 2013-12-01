@@ -1,6 +1,6 @@
 import unittest
 
-from appy_ast import BinaryOperator, Literal, Value, ExpressionStatement, PrintStatement
+from appy_ast import BinaryOperator, Literal, Value, ExpressionStatement, PrintStatement, IfStatement, Assignment, Variable
 from lexer import create_lexer
 from parser import create_parser
 
@@ -82,6 +82,15 @@ class ParserTest(unittest.TestCase):
         self.assert_ast(
             'print "Hello"',
             PrintStatement(Literal(Value('str', 'Hello'))))
+
+    def test_if(self):
+        self.assert_ast(
+            '''
+if True:
+    x = 5''',
+            IfStatement(bool_literal(True),
+                        Assignment(Variable('x'), int_literal(5)))
+        )
 
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)

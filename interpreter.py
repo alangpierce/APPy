@@ -1,4 +1,4 @@
-from appy_ast import Value, ExpressionStatement, PrintStatement, Seq, Assignment, Variable
+from appy_ast import Value, ExpressionStatement, PrintStatement, Seq, Assignment, Variable, IfStatement
 
 
 def execute_statement(statement, stdout_handler, scope):
@@ -56,6 +56,14 @@ def execute_PrintStatement(statement, stdout_handler, scope):
     assert isinstance(statement, PrintStatement)
     value = evaluate_expression(statement.expr, scope)
     stdout_handler(str(value.value))
+
+
+def execute_IfStatement(statement, stdout_handler, scope):
+    assert isinstance(statement, IfStatement)
+    condition_value = evaluate_expression(statement.condition, scope)
+    # TODO: This is lame and hides the interesting stuff.
+    if condition_value.value:
+        execute_statement(statement.statement, stdout_handler, scope)
 
 
 BINARY_OPERATORS = {

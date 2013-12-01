@@ -1,6 +1,6 @@
 from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
-                      Seq, ExpressionStatement, PrintStatement)
+                      Seq, ExpressionStatement, PrintStatement, IfStatement)
 import lexer
 
 tokens = lexer.tokens
@@ -32,6 +32,11 @@ def p_assignment_statement(p):
 def p_print_statement(p):
     '''statement : PRINT expression NEWLINE'''
     p[0] = PrintStatement(p[2])
+
+
+def p_if_statement(p):
+    '''statement : IF expression COLON NEWLINE INDENT statement DEDENT'''
+    p[0] = IfStatement(p[2], p[6])
 
 
 def p_expression_plus(p):

@@ -56,10 +56,19 @@ class InterpreterTest(unittest.TestCase):
 x = 5
 print x + 3
 ''',
-            "8")
+            '8')
 
     def test_illegal_variable(self):
         self.assert_error(NameError, 'foo + 5')
+
+    def test_if(self):
+        self.assert_execute(
+            '''
+x = 7
+if x > 5:
+    print 'Greater'
+''',
+        'Greater')
 
     def assert_evaluate(self, program, expected_value):
         ast = self.get_ast(program)

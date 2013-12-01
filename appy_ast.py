@@ -6,7 +6,8 @@ class Seq(namedtuple('Seq', ['left', 'right'])):
 
 
 class Assignment(namedtuple('Assignment', ['left', 'right'])):
-    pass
+    def pretty_print(self):
+        return self.left.pretty_print() + ' = ' + self.right.pretty_print()
 
 
 class ExpressionStatement(namedtuple('ExpressionStatement', ['expr'])):
@@ -17,6 +18,12 @@ class ExpressionStatement(namedtuple('ExpressionStatement', ['expr'])):
 class PrintStatement(namedtuple('PrintStatement', ['expr'])):
     def pretty_print(self):
         return 'print ' + self.expr.pretty_print()
+
+
+class IfStatement(namedtuple('IfStatement', ['condition', 'statement'])):
+    def pretty_print(self):
+        return 'if ' + self.condition.pretty_print() + ':\n\t' +\
+               self.statement.pretty_print()
 
 
 class BinaryOperator(namedtuple('BinaryOperator',
