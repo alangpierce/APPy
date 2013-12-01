@@ -1,4 +1,5 @@
 from ply.lex import LexToken
+import re
 from line_lexer import LineLexer
 
 
@@ -23,15 +24,19 @@ class FileLexer(object):
     def __init__(self):
         self.delegate_lexer = LineLexer()
 
-    def tokenize(self, string):
+    def tokenize(self, program):
+        for logical_line in self._get_logical_lines(program):
+            for token in self.delegate_lexer.tokenize(logical_line):
+                yield token
+            yield self._create_newline_token()
+
+    def _get_logical_lines(self, program):
         nesting_level = 0
-        assert isinstance(string, str)
-        raw_lines = string.split('\n')
         current_lines = []
-        for line in raw_lines:
-            nesting_level = (nesting_level +
-                line.count('(') + line.count('[') + line.count('{') -
-                line.count(')') - line.count(']') - line.count('}'))
+        for line in program.split('\n'):
+            if self._is_line_blank(line):
+                continue
+            nesting_level += self._get_nesting_difference(line)
             if nesting_level > 0:
                 current_lines.append(line)
                 continue
@@ -40,16 +45,23 @@ class FileLexer(object):
                 continue
             current_lines.append(line)
             # No reason to continue, so this is the end of the logical line.
-            # Make sure
-            logical_line = ' '.join(current_lines)
-            for token in self.delegate_lexer.tokenize(logical_line):
-                yield token
-            yield self.create_newline_token()
+            # Make sure there's at least some whitespace between lines.
+            yield ' '.join(current_lines)
             del current_lines[:]
-        if nesting_level != 0:
-            raise SyntaxError('Nonzero ending nesting level: ' + nesting_level)
+        if nesting_level != 0 or len(current_lines) > 0:
+            raise SyntaxError('Unexpected end of file.')
 
-    def create_newline_token(self):
+    def _is_line_blank(self, line):
+        return re.match(r'^[ \t]*$', line)
+
+    def _get_nesting_difference(self, line):
+        """Determines the net number of nesting levels introduced by
+        this line.
+        """
+        return (line.count('(') + line.count('[') + line.count('{') -
+                line.count(')') - line.count(']') - line.count('}'))
+
+    def _create_newline_token(self):
         token = LexToken()
         token.type = 'NEWLINE'
         token.value = '\n'

@@ -75,8 +75,6 @@ class LexerTest(unittest.TestCase):
             '1 + 2',
             [num(5), plus, num(5), num(1), plus, num(2), newline])
 
-    # TODO: Not implemented yet
-    @unittest.expectedFailure
     def test_empty_lines_ignored(self):
         self.assert_tokens(
             '1\n \t\n2',
