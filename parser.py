@@ -1,5 +1,6 @@
 from ply import yacc
-from appy_ast import BinaryOperator, Literal, Value
+from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
+                      Seq, ExpressionStatement, PrintStatement)
 import lexer
 
 tokens = lexer.tokens
@@ -14,9 +15,23 @@ precedence = (
 )
 
 
+def p_seq(p):
+    '''statement : statement statement'''
+    p[0] = Seq(p[1], p[2])
+
 def p_expression_statement(p):
     '''statement : expression NEWLINE'''
-    p[0] = p[1]
+    p[0] = ExpressionStatement(p[1])
+
+
+def p_assignment_statement(p):
+    '''statement : expression ASSIGN expression NEWLINE'''
+    p[0] = Assignment(p[1], p[3])
+
+
+def p_print_statement(p):
+    '''statement : PRINT expression NEWLINE'''
+    p[0] = PrintStatement(p[2])
 
 
 def p_expression_plus(p):
@@ -56,6 +71,11 @@ def p_bool_literal(p):
 def p_string_literal(p):
     'expression : STRING'
     p[0] = Literal(Value('str', p[1]))
+
+
+def p_variable(p):
+    'expression : ID'
+    p[0] = Variable(p[1])
 
 
 def p_error(p):

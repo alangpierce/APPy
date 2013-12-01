@@ -20,6 +20,7 @@ colon = ('COLON', ':')
 newline = ('NEWLINE', '')
 indent = ('INDENT', '')
 dedent = ('DEDENT', '')
+print_token = ('PRINT', 'print')
 
 class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
@@ -100,6 +101,11 @@ class LexerTest(unittest.TestCase):
         self.assert_tokens(
             'iframe + r',
             [ident('iframe'), plus, ident('r'), newline])
+
+    def test_print(self):
+        self.assert_tokens(
+            'print "Hello"',
+            [print_token, string('Hello'), newline])
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)

@@ -1,5 +1,13 @@
-from appy_ast import Value
+from appy_ast import Value, ExpressionStatement, PrintStatement
 
+
+def execute_statement(statement, stdout_handler):
+    try:
+        method = globals()['execute_' + statement.__class__.__name__]
+    except KeyError as e:
+        raise NotImplementedError(
+            'Missing handler for statement ' + str(statement))
+    return method(statement, stdout_handler)
 
 def evaluate_expression(expression):
     try:
@@ -8,6 +16,17 @@ def evaluate_expression(expression):
         raise NotImplementedError(
             'Missing handler for expression ' + str(expression))
     return method(expression)
+
+
+def execute_ExpressionStatement(statement, stdout_handler):
+    assert isinstance(statement, ExpressionStatement)
+    evaluate_expression(statement.expr)
+
+
+def execute_PrintStatement(statement, stdout_handler):
+    assert isinstance(statement, PrintStatement)
+    value = evaluate_expression(statement.expr)
+    stdout_handler(str(value.value))
 
 
 BINARY_OPERATORS = {

@@ -1,6 +1,6 @@
 import unittest
 
-from appy_ast import BinaryOperator, Literal, Value
+from appy_ast import BinaryOperator, Literal, Value, ExpressionStatement, PrintStatement
 from lexer import create_lexer
 from parser import create_parser
 
@@ -19,12 +19,12 @@ def bool_literal(bool_value):
 
 class ParserTest(unittest.TestCase):
     def test_basic_parsing(self):
-        self.assert_ast(
+        self.assert_ast_expression(
             '5 + 3',
             BinaryOperator('+', int_literal(5), int_literal(3)))
 
     def test_operator_precedence(self):
-        self.assert_ast(
+        self.assert_ast_expression(
             '1*2 + 5*6 - 4/2',
             BinaryOperator(
                 '-',
@@ -35,7 +35,7 @@ class ParserTest(unittest.TestCase):
                 BinaryOperator('/', int_literal(4), int_literal(2))))
 
     def test_parens(self):
-        self.assert_ast(
+        self.assert_ast_expression(
             '3 * (1 + 2)',
             BinaryOperator(
                 '*',
@@ -43,7 +43,7 @@ class ParserTest(unittest.TestCase):
                 BinaryOperator('+', int_literal(1), int_literal(2))))
 
     def test_string_concat(self):
-        self.assert_ast(
+        self.assert_ast_expression(
             "'Hello, ' + \"world!\"",
             BinaryOperator(
                 '+',
@@ -51,7 +51,7 @@ class ParserTest(unittest.TestCase):
                 string_literal('world!')))
 
     def test_boolean_expression(self):
-        self.assert_ast(
+        self.assert_ast_expression(
             'True or False and True',
             BinaryOperator(
                 'or',
@@ -62,22 +62,35 @@ class ParserTest(unittest.TestCase):
                     bool_literal(True))))
 
     def test_comparisons(self):
-        self.assert_ast('1 == 2',
-                        BinaryOperator('==', int_literal(1), int_literal(2)))
-        self.assert_ast('1 < 2',
-                        BinaryOperator('<', int_literal(1), int_literal(2)))
-        self.assert_ast('1 > 2',
-                        BinaryOperator('>', int_literal(1), int_literal(2)))
-        self.assert_ast('1 <= 2',
-                        BinaryOperator('<=', int_literal(1), int_literal(2)))
-        self.assert_ast('1 >= 2',
-                        BinaryOperator('>=', int_literal(1), int_literal(2)))
+        self.assert_ast_expression(
+            '1 == 2',
+            BinaryOperator('==', int_literal(1), int_literal(2)))
+        self.assert_ast_expression(
+            '1 < 2',
+            BinaryOperator('<', int_literal(1), int_literal(2)))
+        self.assert_ast_expression(
+            '1 > 2',
+            BinaryOperator('>', int_literal(1), int_literal(2)))
+        self.assert_ast_expression(
+            '1 <= 2',
+            BinaryOperator('<=', int_literal(1), int_literal(2)))
+        self.assert_ast_expression(
+            '1 >= 2',
+            BinaryOperator('>=', int_literal(1), int_literal(2)))
+
+    def test_print(self):
+        self.assert_ast(
+            'print "Hello"',
+            PrintStatement(Literal(Value('str', 'Hello'))))
 
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)
         self.assertEqual(expected_ast, actual_ast,
                          "Expected: " + expected_ast.pretty_print() +
                          ", Actual: " + actual_ast.pretty_print(), )
+
+    def assert_ast_expression(self, program, expected_ast_expression):
+        self.assert_ast(program, ExpressionStatement(expected_ast_expression))
 
     def get_ast(self, program):
         parser = create_parser()

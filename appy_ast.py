@@ -1,5 +1,24 @@
 from collections import namedtuple
 
+
+class Assignment(namedtuple('Assignment', ['left', 'right'])):
+    pass
+
+
+class Seq(namedtuple('Seq', ['left', 'right'])):
+    pass
+
+
+class ExpressionStatement(namedtuple('ExpressionStatement', ['expr'])):
+    def pretty_print(self):
+        return self.expr.pretty_print()
+
+
+class PrintStatement(namedtuple('PrintStatement', ['expr'])):
+    def pretty_print(self):
+        return 'print ' + self.expr.pretty_print()
+
+
 class BinaryOperator(namedtuple('BinaryOperator',
                                 ['operator', 'left', 'right'])):
     def pretty_print(self):
@@ -11,6 +30,11 @@ class BinaryOperator(namedtuple('BinaryOperator',
 class Literal(namedtuple('Literal', ['value'])):
     def pretty_print(self):
         return self.value.pretty_print()
+
+
+class Variable(namedtuple('Variable', ['name'])):
+    def pretty_print(self):
+        return self.name
 
 # type is one of 'string' or 'int'
 # value is a python representation of that value

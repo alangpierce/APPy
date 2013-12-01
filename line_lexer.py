@@ -24,6 +24,7 @@ class LineLexer(object):
         'and': 'AND',
         'or': 'OR',
         'not': 'NOT',
+        'print': 'PRINT',
     }
 
     tokens = [
@@ -40,9 +41,10 @@ class LineLexer(object):
         'GREATERTHANOREQUAL',
         'LPAREN',
         'RPAREN',
+        'ASSIGN',
         'COLON',
         'STRING',
-        'ID'
+        'ID',
     ] + reserved_words.values()
 
     t_PLUS = r'\+'
@@ -57,6 +59,7 @@ class LineLexer(object):
     t_GREATERTHANOREQUAL = r'>='
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
+    t_ASSIGN = r'='
     t_COLON = r':'
 
     def string_regex(delimiter):

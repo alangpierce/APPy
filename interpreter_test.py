@@ -1,7 +1,7 @@
 import unittest
 
-from appy_ast import Value
-from interpreter import evaluate_expression
+from appy_ast import Value, ExpressionStatement
+from interpreter import evaluate_expression, execute_statement
 from lexer import create_lexer
 from parser import create_parser
 
@@ -44,13 +44,31 @@ class InterpreterTest(unittest.TestCase):
         self.assert_evaluate('5 == 5 and 3 < 5 and 1 != 2', bool_value(True))
         self.assert_evaluate('1 > 3 or 100 <= 10', bool_value(False))
 
+    def test_print(self):
+        self.assert_execute('print "Hello"', "Hello")
+
+    # TODO: Not implemented yet
+    @unittest.expectedFailure
+    def test_assignment(self):
+        self.assert_evaluate(
+            'x = 5\n' +
+            'x + 3',
+            int_value(8))
+
     def assert_evaluate(self, program, expected_value):
         ast = self.get_ast(program)
-        self.assertEqual(expected_value, evaluate_expression(ast))
+        assert isinstance(ast, ExpressionStatement)
+        self.assertEqual(expected_value, evaluate_expression(ast.expr))
+
+    def assert_execute(self, program, expected_stdout):
+        ast = self.get_ast(program)
+        stdout_builder = []
+        execute_statement(ast, lambda s: stdout_builder.append(s))
+        self.assertEqual(expected_stdout, ''.join(stdout_builder))
 
     def assert_type_error(self, program):
         ast = self.get_ast(program)
-        self.assertRaises(TypeError, evaluate_expression, ast)
+        self.assertRaises(TypeError, execute_statement, ast)
 
     def get_ast(self, program):
         parser = create_parser()
