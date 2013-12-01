@@ -1,5 +1,7 @@
 import unittest
+from file_lexer import FileLexer
 from lexer import create_lexer
+
 
 def num(n):
     return ('NUMBER', n)

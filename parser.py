@@ -1,8 +1,8 @@
 from ply import yacc
 from appy_ast import BinaryOperator, Literal, Value
-import lexer
+import line_lexer
 
-tokens = lexer.tokens
+tokens = line_lexer.LineLexerInstance.tokens
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),

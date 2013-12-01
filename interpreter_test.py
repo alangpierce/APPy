@@ -1,6 +1,7 @@
 import unittest
 
 from appy_ast import Value
+from file_lexer import FileLexer
 from interpreter import evaluate_expression
 from lexer import create_lexer
 from parser import create_parser
@@ -45,7 +46,7 @@ class InterpreterTest(unittest.TestCase):
     def get_ast(self, program):
         parser = create_parser()
         lexer = create_lexer()
-        return parser.parse(program)
+        return parser.parse(program, lexer)
 
 if __name__ == '__main__':
     unittest.main()
