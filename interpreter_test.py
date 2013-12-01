@@ -5,17 +5,20 @@ from interpreter import evaluate_expression, execute_statement
 from lexer import create_lexer
 from parser import create_parser
 
+
 def int_value(int_val):
     return Value('int', int_val)
+
 
 def string_value(string_val):
     return Value('str', string_val)
 
+
 def bool_value(bool_val):
     return Value('bool', bool_val)
 
-class InterpreterTest(unittest.TestCase):
 
+class InterpreterTest(unittest.TestCase):
     def test_basic_interpreter(self):
         self.assert_evaluate('5 + 3', int_value(8))
 
@@ -47,23 +50,23 @@ class InterpreterTest(unittest.TestCase):
     def test_print(self):
         self.assert_execute('print "Hello"', "Hello")
 
-    # TODO: Not implemented yet
-    @unittest.expectedFailure
     def test_assignment(self):
-        self.assert_evaluate(
-            'x = 5\n' +
-            'x + 3',
-            int_value(8))
+        self.assert_execute(
+            '''
+x = 5
+print x + 3
+''',
+            "8")
 
     def assert_evaluate(self, program, expected_value):
         ast = self.get_ast(program)
         assert isinstance(ast, ExpressionStatement)
-        self.assertEqual(expected_value, evaluate_expression(ast.expr))
+        self.assertEqual(expected_value, evaluate_expression(ast.expr, {}))
 
     def assert_execute(self, program, expected_stdout):
         ast = self.get_ast(program)
         stdout_builder = []
-        execute_statement(ast, lambda s: stdout_builder.append(s))
+        execute_statement(ast, lambda s: stdout_builder.append(s), {})
         self.assertEqual(expected_stdout, ''.join(stdout_builder))
 
     def assert_type_error(self, program):
@@ -74,6 +77,7 @@ class InterpreterTest(unittest.TestCase):
         parser = create_parser()
         lexer = create_lexer()
         return parser.parse(program, lexer)
+
 
 if __name__ == '__main__':
     unittest.main()

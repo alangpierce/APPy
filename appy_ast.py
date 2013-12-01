@@ -1,11 +1,11 @@
 from collections import namedtuple
 
 
-class Assignment(namedtuple('Assignment', ['left', 'right'])):
+class Seq(namedtuple('Seq', ['left', 'right'])):
     pass
 
 
-class Seq(namedtuple('Seq', ['left', 'right'])):
+class Assignment(namedtuple('Assignment', ['left', 'right'])):
     pass
 
 
@@ -35,6 +35,7 @@ class Literal(namedtuple('Literal', ['value'])):
 class Variable(namedtuple('Variable', ['name'])):
     def pretty_print(self):
         return self.name
+
 
 # type is one of 'string' or 'int'
 # value is a python representation of that value
