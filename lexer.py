@@ -1,6 +1,7 @@
 from re import match
 from ply import lex
 from ply.lex import TOKEN
+from logical_line_lexer import LogicalLineLexer
 
 tokens = (
     'NUMBER',
@@ -18,6 +19,7 @@ t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDEDBY = r'/'
+
 
 def t_NUMBER(t):
     r'\d+'
@@ -60,7 +62,7 @@ def escape_string(string):
 
 def string_regex(delimiter):
     return ('[uUbB]?[Rr]?' +
-           delimiter + '([^' + delimiter + r'\\]|\\.)*' + delimiter)
+            delimiter + '([^' + delimiter + r'\\]|\\.)*' + delimiter)
 
 
 @TOKEN(string_regex("'") + '|' + string_regex('"'))
@@ -68,7 +70,7 @@ def t_STRING(t):
     origin_string = t.value
     delimiter = origin_string[-1]
     delim_start = origin_string.find(delimiter)
-    string_contents = origin_string[delim_start+1:-1]
+    string_contents = origin_string[delim_start + 1:-1]
     prefix = origin_string[0:delim_start]
     # TODO: Unicode, bytes
     if not match('[rR]', prefix):
@@ -82,12 +84,14 @@ def t_LPAREN(t):
     t.lexer.paren_nesting_level += 1
     return t
 
+
 def t_RPAREN(t):
     r'\)'
     if t.lexer.paren_nesting_level <= 0:
         raise SyntaxError("Unmatched ')'")
     t.lexer.paren_nesting_level -= 1
     return t
+
 
 def t_NEWLINE(t):
     r'\n'
@@ -99,7 +103,6 @@ def t_NEWLINE(t):
 
 
 t_ignore_ESCAPED_NEWLINE = r'\\\n'
-
 
 t_ignore = ' \t'
 
@@ -113,4 +116,4 @@ def create_lexer():
     lexer.paren_nesting_level = 0
     lexer.bracket_nesting_level = 0
     lexer.brace_nesting_level = 0
-    return lexer
+    return LogicalLineLexer(lexer)

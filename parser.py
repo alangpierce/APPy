@@ -40,4 +40,3 @@ def p_error(p):
 
 def create_parser():
     return yacc.yacc()
-
