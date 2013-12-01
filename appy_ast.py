@@ -3,14 +3,14 @@ from collections import namedtuple
 class BinaryOperator(namedtuple('BinaryOperator',
                                 ['operator', 'left', 'right'])):
     def pretty_print(self):
-        return '(' + self.left.pretty_print() + self.operator + \
-               self.right.pretty_print() + ')'
+        return ('(' + self.left.pretty_print() + ' ' + self.operator + ' ' +
+                self.right.pretty_print() + ')')
 
 
 # value is of type Value
 class Literal(namedtuple('Literal', ['value'])):
     def pretty_print(self):
-        return str(self.value)
+        return self.value.pretty_print()
 
 # type is one of 'string' or 'int'
 # value is a python representation of that value

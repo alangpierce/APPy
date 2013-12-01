@@ -18,7 +18,12 @@ class LineLexer(object):
                 break
 
     reserved_words = {
-        'if': 'IF'
+        'if': 'IF',
+        'True': 'TRUE',
+        'False': 'FALSE',
+        'and': 'AND',
+        'or': 'OR',
+        'not': 'NOT',
     }
 
     tokens = [
@@ -27,6 +32,12 @@ class LineLexer(object):
         'MINUS',
         'TIMES',
         'DIVIDEDBY',
+        'EQUALS',
+        'NOTEQUAL',
+        'LESSTHAN',
+        'GREATERTHAN',
+        'LESSTHANOREQUAL',
+        'GREATERTHANOREQUAL',
         'LPAREN',
         'RPAREN',
         'COLON',
@@ -38,6 +49,12 @@ class LineLexer(object):
     t_MINUS = r'-'
     t_TIMES = r'\*'
     t_DIVIDEDBY = r'/'
+    t_EQUALS = r'=='
+    t_NOTEQUAL = r'!='
+    t_LESSTHAN = r'<'
+    t_GREATERTHAN = r'>'
+    t_LESSTHANOREQUAL = r'<='
+    t_GREATERTHANOREQUAL = r'>='
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
     t_COLON = r':'
@@ -63,6 +80,8 @@ class LineLexer(object):
     def t_ID(self, t):
         r'[a-zA-Z_][a-zA-Z_0-9]*'
         t.type = self.reserved_words.get(t.value,'ID')
+        if t.value == 'True' or t.value == 'False':
+            t.value = (t.value == 'True')
         return t
 
     def t_NUMBER(self, t):

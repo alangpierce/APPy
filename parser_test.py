@@ -5,12 +5,16 @@ from lexer import create_lexer
 from parser import create_parser
 
 
-def int_literal(int):
-    return Literal(Value('int', int))
+def int_literal(int_value):
+    return Literal(Value('int', int_value))
 
 
-def string_literal(string):
-    return Literal(Value('str', string))
+def string_literal(string_value):
+    return Literal(Value('str', string_value))
+
+
+def bool_literal(bool_value):
+    return Literal(Value('bool', bool_value))
 
 
 class ParserTest(unittest.TestCase):
@@ -46,6 +50,28 @@ class ParserTest(unittest.TestCase):
                 string_literal('Hello, '),
                 string_literal('world!')))
 
+    def test_boolean_expression(self):
+        self.assert_ast(
+            'True or False and True',
+            BinaryOperator(
+                'or',
+                bool_literal(True),
+                BinaryOperator(
+                    'and',
+                    bool_literal(False),
+                    bool_literal(True))))
+
+    def test_comparisons(self):
+        self.assert_ast('1 == 2',
+                        BinaryOperator('==', int_literal(1), int_literal(2)))
+        self.assert_ast('1 < 2',
+                        BinaryOperator('<', int_literal(1), int_literal(2)))
+        self.assert_ast('1 > 2',
+                        BinaryOperator('>', int_literal(1), int_literal(2)))
+        self.assert_ast('1 <= 2',
+                        BinaryOperator('<=', int_literal(1), int_literal(2)))
+        self.assert_ast('1 >= 2',
+                        BinaryOperator('>=', int_literal(1), int_literal(2)))
 
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)

@@ -20,6 +20,13 @@ def p_expression_plus(p):
                   | expression MINUS expression
                   | expression TIMES expression
                   | expression DIVIDEDBY expression
+                  | expression EQUALS expression
+                  | expression LESSTHAN expression
+                  | expression GREATERTHAN expression
+                  | expression LESSTHANOREQUAL expression
+                  | expression GREATERTHANOREQUAL expression
+                  | expression AND expression
+                  | expression OR expression
     '''
     p[0] = BinaryOperator(p[2], p[1], p[3])
 
@@ -32,6 +39,13 @@ def p_expression_parens(p):
 def p_int_literal(p):
     'expression : NUMBER'
     p[0] = Literal(Value('int', p[1]))
+
+
+def p_bool_literal(p):
+    '''expression : TRUE
+                  | FALSE
+    '''
+    p[0] = Literal(Value('bool', p[1]))
 
 
 def p_string_literal(p):
