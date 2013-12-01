@@ -32,7 +32,7 @@ class InterpreterTest(unittest.TestCase):
         self.assert_evaluate('"hello" + "world"', string_value('helloworld'))
 
     def test_string_subtract_is_illegal(self):
-        self.assert_type_error('"hello" - "world"')
+        self.assert_error(TypeError, '"hello" - "world"')
 
     def test_string_multiply_right(self):
         self.assert_evaluate('"hello" * 3', string_value('hellohellohello'))
@@ -58,6 +58,9 @@ print x + 3
 ''',
             "8")
 
+    def test_illegal_variable(self):
+        self.assert_error(NameError, 'foo + 5')
+
     def assert_evaluate(self, program, expected_value):
         ast = self.get_ast(program)
         assert isinstance(ast, ExpressionStatement)
@@ -69,9 +72,10 @@ print x + 3
         execute_statement(ast, lambda s: stdout_builder.append(s), {})
         self.assertEqual(expected_stdout, ''.join(stdout_builder))
 
-    def assert_type_error(self, program):
+    def assert_error(self, exception_type, program):
         ast = self.get_ast(program)
-        self.assertRaises(TypeError, execute_statement, ast)
+        self.assertRaises(
+            exception_type, execute_statement, ast, lambda: None, {})
 
     def get_ast(self, program):
         parser = create_parser()
