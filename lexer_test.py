@@ -15,9 +15,11 @@ lparen = ('LPAREN', '(')
 rparen = ('RPAREN', ')')
 def string(s):
     return ('STRING', s)
-newline = ('NEWLINE', '\n')
 if_token = ('IF', 'if')
 colon = ('COLON', ':')
+newline = ('NEWLINE', '')
+indent = ('INDENT', '')
+dedent = ('DEDENT', '')
 
 class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
@@ -88,8 +90,8 @@ class LexerTest(unittest.TestCase):
         self.assert_tokens(
             'if 1 + 1:\n'
             '    2 + 3',
-            [if_token, num(1), plus, num(1), colon, newline, num(2), plus,
-             num(3), newline])
+            [if_token, num(1), plus, num(1), colon, newline, indent, num(2),
+             plus, num(3), newline, dedent])
 
     def test_identifier(self):
         self.assert_tokens('x + 5', [ident('x'), plus, num(5), newline])
