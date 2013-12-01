@@ -5,6 +5,8 @@ from lexer import create_lexer
 
 def num(n):
     return ('NUMBER', n)
+def ident(s):
+    return ('ID', s)
 plus = ('PLUS', '+')
 minus = ('MINUS', '-')
 times = ('TIMES', '*')
@@ -14,6 +16,8 @@ rparen = ('RPAREN', ')')
 def string(s):
     return ('STRING', s)
 newline = ('NEWLINE', '\n')
+if_token = ('IF', 'if')
+colon = ('COLON', ':')
 
 class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
@@ -79,6 +83,21 @@ class LexerTest(unittest.TestCase):
         self.assert_tokens(
             '1\n \t\n2',
             [num(1), newline, num(2), newline])
+
+    def test_if(self):
+        self.assert_tokens(
+            'if 1 + 1:\n'
+            '    2 + 3',
+            [if_token, num(1), plus, num(1), colon, newline, num(2), plus,
+             num(3), newline])
+
+    def test_identifier(self):
+        self.assert_tokens('x + 5', [ident('x'), plus, num(5), newline])
+
+    def test_conflicting_identifiers(self):
+        self.assert_tokens(
+            'iframe + r',
+            [ident('iframe'), plus, ident('r'), newline])
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)

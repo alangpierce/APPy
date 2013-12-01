@@ -17,7 +17,11 @@ class LineLexer(object):
             else:
                 break
 
-    tokens = (
+    reserved_words = {
+        'if': 'IF'
+    }
+
+    tokens = [
         'NUMBER',
         'PLUS',
         'MINUS',
@@ -25,8 +29,10 @@ class LineLexer(object):
         'DIVIDEDBY',
         'LPAREN',
         'RPAREN',
+        'COLON',
         'STRING',
-    )
+        'ID'
+    ] + reserved_words.values()
 
     t_PLUS = r'\+'
     t_MINUS = r'-'
@@ -34,6 +40,30 @@ class LineLexer(object):
     t_DIVIDEDBY = r'/'
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
+    t_COLON = r':'
+
+    def string_regex(delimiter):
+        return ('[uUbB]?[Rr]?' +
+                delimiter + '([^' + delimiter + r'\\]|\\.)*' + delimiter)
+
+    @TOKEN(string_regex("'") + '|' + string_regex('"'))
+    def t_STRING(self, t):
+        code_string = t.value
+        delimiter = code_string[-1]
+        delim_start = code_string.find(delimiter)
+        string_contents = code_string[delim_start + 1:-1]
+        prefix = code_string[0:delim_start]
+        # TODO: Unicode, bytes
+        if not match('[rR]', prefix):
+            string_contents = self.escape_string(string_contents)
+        t.value = string_contents
+        return t
+
+    # Taken from example at http://www.dabeaz.com/ply/ply.html#ply_nn6
+    def t_ID(self, t):
+        r'[a-zA-Z_][a-zA-Z_0-9]*'
+        t.type = self.reserved_words.get(t.value,'ID')
+        return t
 
     def t_NUMBER(self, t):
         r'\d+'
@@ -48,8 +78,8 @@ class LineLexer(object):
     # backslash before it.
     # TODO: Implement the following from the spec:
     # \N{name} 	Character named name in the Unicode database (Unicode only)
-    # \uxxxx 	Character with 16-bit hex value xxxx (Unicode only) 	(1)
-    # \Uxxxxxxxx 	Character with 32-bit hex value xxxxxxxx (Unicode only) 	(2)
+    # \uxxxx 	Character with 16-bit hex value xxxx (Unicode only) (1)
+    # \Uxxxxxxxx 	Character with 32-bit hex value xxxxxxxx (Unicode only) (2)
     # \ooo 	Character with octal value ooo 	(3,5)
     # \xhh 	Character with hex value hh 	(4,5)
     ESCAPE_MAPPINGS = [
@@ -70,24 +100,6 @@ class LineLexer(object):
         for (key, value) in LineLexer.ESCAPE_MAPPINGS:
             string = string.replace('\\' + key, value)
         return string
-
-    def string_regex(delimiter):
-        return ('[uUbB]?[Rr]?' +
-                delimiter + '([^' + delimiter + r'\\]|\\.)*' + delimiter)
-
-    @TOKEN(string_regex("'") + '|' + string_regex('"'))
-    def t_STRING(self, t):
-        code_string = t.value
-        delimiter = code_string[-1]
-        delim_start = code_string.find(delimiter)
-        string_contents = code_string[delim_start + 1:-1]
-        prefix = code_string[0:delim_start]
-        # TODO: Unicode, bytes
-        if not match('[rR]', prefix):
-            string_contents = self.escape_string(string_contents)
-        t.value = string_contents
-        return t
-
     t_ignore = ' \t\n'
 
     def t_error(self, t):

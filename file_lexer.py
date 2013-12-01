@@ -15,11 +15,11 @@ class FileLexer(object):
     this approach splits the responsibilities up in a cleaner way.
     """
 
-    tokens = (
+    tokens = [
         'INDENT',
         'DEDENT',
         'NEWLINE',
-    )
+    ]
 
     def __init__(self):
         self.delegate_lexer = LineLexer()
