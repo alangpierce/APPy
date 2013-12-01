@@ -1,13 +1,18 @@
 from ply import yacc
 from appy_ast import BinaryOperator, Literal, Value
-import line_lexer
+import lexer
 
-tokens = line_lexer.LineLexerInstance.tokens
+tokens = lexer.tokens
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDEDBY'),
 )
+
+
+def p_expression_statement(p):
+    '''statement : expression NEWLINE'''
+    p[0] = p[1]
 
 
 def p_expression_plus(p):

@@ -1,4 +1,5 @@
 from file_lexer import FileLexer
+from line_lexer import LineLexer
 
 
 class PlyLexerAdapter:
@@ -26,3 +27,5 @@ class PlyLexerAdapter:
 
 def create_lexer():
     return PlyLexerAdapter(FileLexer())
+
+tokens = FileLexer.tokens + LineLexer.tokens

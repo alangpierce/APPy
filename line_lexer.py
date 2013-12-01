@@ -4,18 +4,11 @@ from ply.lex import TOKEN, Lexer
 
 
 class LineLexer(object):
-    def tokenize(self, string):
-        return LineLexerInstance().tokenize(string)
-
-
-class LineLexerInstance(object):
     def __init__(self):
-        self.paren_nesting_level = 0
-        self.brace_nesting_level = 0
-        self.bracket_nesting_level = 0
         self.lexer = lex.lex(module=self)
 
     def tokenize(self, string):
+        lexer = lex.lex(module=self)
         self.lexer.input(string)
         while True:
             token = self.lexer.token()
@@ -33,13 +26,14 @@ class LineLexerInstance(object):
         'LPAREN',
         'RPAREN',
         'STRING',
-        'NEWLINE',
     )
 
     t_PLUS = r'\+'
     t_MINUS = r'-'
     t_TIMES = r'\*'
     t_DIVIDEDBY = r'/'
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
 
     def t_NUMBER(self, t):
         r'\d+'
@@ -73,7 +67,7 @@ class LineLexerInstance(object):
     ]
 
     def escape_string(self, string):
-        for (key, value) in LineLexerInstance.ESCAPE_MAPPINGS:
+        for (key, value) in LineLexer.ESCAPE_MAPPINGS:
             string = string.replace('\\' + key, value)
         return string
 
@@ -83,40 +77,18 @@ class LineLexerInstance(object):
 
     @TOKEN(string_regex("'") + '|' + string_regex('"'))
     def t_STRING(self, t):
-        origin_string = t.value
-        delimiter = origin_string[-1]
-        delim_start = origin_string.find(delimiter)
-        string_contents = origin_string[delim_start + 1:-1]
-        prefix = origin_string[0:delim_start]
+        code_string = t.value
+        delimiter = code_string[-1]
+        delim_start = code_string.find(delimiter)
+        string_contents = code_string[delim_start + 1:-1]
+        prefix = code_string[0:delim_start]
         # TODO: Unicode, bytes
         if not match('[rR]', prefix):
             string_contents = self.escape_string(string_contents)
         t.value = string_contents
         return t
 
-    def t_LPAREN(self, t):
-        r'\('
-        self.paren_nesting_level += 1
-        return t
-
-    def t_RPAREN(self, t):
-        r'\)'
-        if self.paren_nesting_level <= 0:
-            raise SyntaxError("Unmatched ')'")
-        self.paren_nesting_level -= 1
-        return t
-
-    def t_NEWLINE(self, t):
-        r'\n'
-        if (self.paren_nesting_level == 0 and
-                    self.bracket_nesting_level == 0 and
-                    self.brace_nesting_level == 0):
-            return t
-            # else ignore the token
-
-    t_ignore_ESCAPED_NEWLINE = r'\\\n'
-
-    t_ignore = ' \t'
+    t_ignore = ' \t\n'
 
     def t_error(self, t):
         raise SyntaxError('Unexpected token: ' + str(t))
