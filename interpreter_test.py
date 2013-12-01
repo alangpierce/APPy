@@ -1,16 +1,18 @@
 import unittest
 
 from appy_ast import Value
-from file_lexer import FileLexer
 from interpreter import evaluate_expression
 from lexer import create_lexer
 from parser import create_parser
 
-def int_value(int):
-    return Value('int', int)
+def int_value(int_val):
+    return Value('int', int_val)
 
-def string_value(string):
-    return Value('str', string)
+def string_value(string_val):
+    return Value('str', string_val)
+
+def bool_value(bool_val):
+    return Value('bool', bool_val)
 
 class InterpreterTest(unittest.TestCase):
 
@@ -34,6 +36,13 @@ class InterpreterTest(unittest.TestCase):
 
     def test_string_multiply_left(self):
         self.assert_evaluate('2 * "hello"', string_value('hellohello'))
+
+    def test_boolean_operators(self):
+        self.assert_evaluate('True or False and True', bool_value(True))
+
+    def test_comparisons(self):
+        self.assert_evaluate('5 == 5 and 3 < 5 and 1 != 2', bool_value(True))
+        self.assert_evaluate('1 > 3 or 100 <= 10', bool_value(False))
 
     def assert_evaluate(self, program, expected_value):
         ast = self.get_ast(program)

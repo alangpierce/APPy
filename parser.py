@@ -5,6 +5,10 @@ import lexer
 tokens = lexer.tokens
 
 precedence = (
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('left', 'EQUALS', 'NOTEQUAL', 'LESSTHAN', 'GREATERTHAN',
+     'LESSTHANOREQUAL', 'GREATERTHANOREQUAL'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDEDBY'),
 )
@@ -21,6 +25,7 @@ def p_expression_plus(p):
                   | expression TIMES expression
                   | expression DIVIDEDBY expression
                   | expression EQUALS expression
+                  | expression NOTEQUAL expression
                   | expression LESSTHAN expression
                   | expression GREATERTHAN expression
                   | expression LESSTHANOREQUAL expression

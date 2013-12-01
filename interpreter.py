@@ -25,6 +25,31 @@ BINARY_OPERATORS = {
     },
     '/': {
         ('int', 'int'): lambda a, b: ('int', a / b),
+    },
+    '==': {
+        ('int', 'int'): lambda a, b: ('bool', a == b)
+    },
+    '!=': {
+        ('int', 'int'): lambda a, b: ('bool', a != b)
+    },
+    '<': {
+        ('int', 'int'): lambda a, b: ('bool', a < b)
+    },
+    '>': {
+        ('int', 'int'): lambda a, b: ('bool', a > b)
+    },
+    '<=': {
+        ('int', 'int'): lambda a, b: ('bool', a <= b)
+    },
+    '>=': {
+        ('int', 'int'): lambda a, b: ('bool', a >= b)
+    },
+    # TODO: Short circuit
+    'and': {
+        ('bool', 'bool'): lambda a, b: ('bool', a and b)
+    },
+    'or': {
+        ('bool', 'bool'): lambda a, b: ('bool', a or b)
     }
 }
 
