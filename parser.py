@@ -1,6 +1,6 @@
 from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
-                      Seq, ExpressionStatement, PrintStatement, IfStatement)
+                      Seq, ExpressionStatement, PrintStatement, IfStatement, WhileStatement)
 import lexer
 
 tokens = lexer.tokens
@@ -37,6 +37,11 @@ def p_print_statement(p):
 def p_if_statement(p):
     '''statement : IF expression COLON NEWLINE INDENT statement DEDENT'''
     p[0] = IfStatement(p[2], p[6])
+
+
+def p_while_statement(p):
+    '''statement : WHILE expression COLON NEWLINE INDENT statement DEDENT'''
+    p[0] = WhileStatement(p[2], p[6])
 
 
 def p_expression_plus(p):

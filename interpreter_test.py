@@ -70,6 +70,19 @@ if x > 5:
 ''',
         'Greater')
 
+    def test_while(self):
+        self.assert_execute(
+            '''
+sum = 0
+i = 0
+while i <= 10:
+    sum = sum + i
+    i = i + 1
+print sum
+''',
+        '55'
+        )
+
     def assert_evaluate(self, program, expected_value):
         ast = self.get_ast(program)
         assert isinstance(ast, ExpressionStatement)

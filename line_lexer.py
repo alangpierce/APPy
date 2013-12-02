@@ -19,6 +19,7 @@ class LineLexer(object):
 
     reserved_words = {
         'if': 'IF',
+        'while': 'WHILE',
         'True': 'TRUE',
         'False': 'FALSE',
         'and': 'AND',

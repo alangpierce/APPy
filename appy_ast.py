@@ -25,6 +25,11 @@ class IfStatement(namedtuple('IfStatement', ['condition', 'statement'])):
         return 'if ' + self.condition.pretty_print() + ':\n\t' +\
                self.statement.pretty_print()
 
+class WhileStatement(namedtuple('WhileStatement', ['condition', 'statement'])):
+    def pretty_print(self):
+        return 'while ' + self.condition.pretty_print() + ':\n\t' +\
+               self.statement.pretty_print()
+
 
 class BinaryOperator(namedtuple('BinaryOperator',
                                 ['operator', 'left', 'right'])):

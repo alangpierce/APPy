@@ -1,6 +1,6 @@
 import unittest
 
-from appy_ast import BinaryOperator, Literal, Value, ExpressionStatement, PrintStatement, IfStatement, Assignment, Variable
+from appy_ast import BinaryOperator, Literal, Value, ExpressionStatement, PrintStatement, IfStatement, Assignment, Variable, WhileStatement
 from lexer import create_lexer
 from parser import create_parser
 
@@ -91,6 +91,15 @@ if True:
             IfStatement(bool_literal(True),
                         Assignment(Variable('x'), int_literal(5)))
         )
+
+    def test_while(self):
+        self.assert_ast(
+            '''
+while False:
+    print "Banana"''',
+            WhileStatement(
+                bool_literal(False),
+                PrintStatement(string_literal('Banana'))))
 
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)

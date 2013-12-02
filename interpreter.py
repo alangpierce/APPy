@@ -1,4 +1,5 @@
-from appy_ast import Value, ExpressionStatement, PrintStatement, Seq, Assignment, Variable, IfStatement
+from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
+                      Assignment, Variable, IfStatement, WhileStatement)
 
 
 class ExecutionEnvironment(object):
@@ -70,6 +71,14 @@ class ExecutionEnvironment(object):
         condition_value = self.evaluate_expression(statement.condition)
         # TODO: This is lame and hides the interesting stuff.
         if condition_value.value:
+            self.execute_statement(statement.statement)
+
+    def execute_WhileStatement(self, statement):
+        assert isinstance(statement, WhileStatement)
+        while True:
+            condition_value = self.evaluate_expression(statement.condition)
+            if not condition_value.value:
+                break
             self.execute_statement(statement.statement)
 
     BINARY_OPERATORS = {

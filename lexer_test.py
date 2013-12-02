@@ -11,11 +11,13 @@ plus = ('PLUS', '+')
 minus = ('MINUS', '-')
 times = ('TIMES', '*')
 dividedby = ('DIVIDEDBY', '/')
+equals = ('EQUALS', '==')
 lparen = ('LPAREN', '(')
 rparen = ('RPAREN', ')')
 def string(s):
     return ('STRING', s)
 if_token = ('IF', 'if')
+while_token = ('WHILE', 'while')
 colon = ('COLON', ':')
 newline = ('NEWLINE', '')
 indent = ('INDENT', '')
@@ -93,6 +95,13 @@ class LexerTest(unittest.TestCase):
             '    2 + 3',
             [if_token, num(1), plus, num(1), colon, newline, indent, num(2),
              plus, num(3), newline, dedent])
+
+    def test_while(self):
+        self.assert_tokens(
+            'while x == 5:\n'
+            '    print x',
+            [while_token, ident('x'), equals, num(5), colon, newline, indent,
+             print_token, ident('x'), newline, dedent])
 
     def test_identifier(self):
         self.assert_tokens('x + 5', [ident('x'), plus, num(5), newline])
