@@ -1,7 +1,7 @@
 import unittest
 
 from appy_ast import Value, ExpressionStatement
-from interpreter import ExecutionEnvironment
+from interpreter import ExecutionEnvironment, Interpreter
 from lexer import create_lexer
 from parser import Parser
 
@@ -84,35 +84,23 @@ print sum
         )
 
     def assert_evaluate(self, program, expected_value):
-        ast = self.get_ast(program)
-        assert isinstance(ast, ExpressionStatement)
-        self.assertEqual(expected_value, self.evaluate_expression(ast.expr))
+        self.assertEqual(expected_value, self.evaluate_expression(program))
 
     def assert_execute(self, program, expected_stdout):
-        ast = self.get_ast(program)
-        actual_stdout = self.execute_statement(ast)
+        actual_stdout = self.execute_program(program)
         self.assertEqual(expected_stdout, actual_stdout)
 
     def assert_error(self, exception_type, program):
-        ast = self.get_ast(program)
-        self.assertRaises(
-            exception_type, self.execute_statement, ast)
-
-    def get_ast(self, program):
-        parser = Parser()
-        lexer = create_lexer()
-        return parser.parse(program, lexer)
+        self.assertRaises(exception_type, self.execute_program, program)
 
     def evaluate_expression(self, expression):
-        environment = ExecutionEnvironment(lambda: None)
-        return environment.evaluate_expression(expression)
+        return Interpreter(lambda: None).evaluate_expression(expression)
 
     # Returns the output from stdout
-    def execute_statement(self, statement):
+    def execute_program(self, program):
         stdout_builder = []
         stdout_handler = lambda s: stdout_builder.append(s)
-        environment = ExecutionEnvironment(stdout_handler)
-        environment.execute_statement(statement)
+        Interpreter(stdout_handler).execute_program(program)
         return ''.join(stdout_builder)
 
 

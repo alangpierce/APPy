@@ -1,5 +1,42 @@
 from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
                       Assignment, Variable, IfStatement, WhileStatement)
+from lexer import create_lexer
+from parser import Parser
+
+
+class Interpreter(object):
+    def __init__(self, stdout_handler):
+        self.stdout_handler = stdout_handler
+
+    def execute_program(self, program):
+        '''
+        Executes a program from the top level. Use the stdout_handler
+        to capture the output.
+        @type program: str
+        @param program: Text of program to execute.
+        '''
+        executor = ExecutionEnvironment(self.stdout_handler)
+        ast = self._parse(program)
+        executor.execute_statement(ast)
+
+    def evaluate_expression(self, expression):
+        '''
+        @type expression: str
+        @param expression:
+        @return: A native Python value corresponding to the evaluated
+        value of the expression, which must be a native Python type.
+        '''
+        executor = ExecutionEnvironment(self.stdout_handler)
+        ast = self._parse(expression)
+        assert isinstance(ast, ExpressionStatement)
+        expr_ast = ast.expr
+        return executor.evaluate_expression(expr_ast)
+
+    def _parse(self, program):
+        parser = Parser()
+        lexer = create_lexer()
+        return parser.parse(program, lexer)
+
 
 
 class ExecutionEnvironment(object):
