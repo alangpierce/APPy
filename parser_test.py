@@ -2,7 +2,7 @@ import unittest
 
 from appy_ast import BinaryOperator, Literal, Value, ExpressionStatement, PrintStatement, IfStatement, Assignment, Variable, WhileStatement
 from lexer import create_lexer
-from parser import create_parser
+from parser import Parser
 
 
 def int_literal(int_value):
@@ -111,7 +111,7 @@ while False:
         self.assert_ast(program, ExpressionStatement(expected_ast_expression))
 
     def get_ast(self, program):
-        parser = create_parser()
+        parser = Parser()
         lexer = create_lexer()
         return parser.parse(program, lexer)
 

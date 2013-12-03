@@ -3,7 +3,7 @@ import unittest
 from appy_ast import Value, ExpressionStatement
 from interpreter import ExecutionEnvironment
 from lexer import create_lexer
-from parser import create_parser
+from parser import Parser
 
 
 def int_value(int_val):
@@ -99,7 +99,7 @@ print sum
             exception_type, self.execute_statement, ast)
 
     def get_ast(self, program):
-        parser = create_parser()
+        parser = Parser()
         lexer = create_lexer()
         return parser.parse(program, lexer)
 
