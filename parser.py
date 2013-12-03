@@ -68,19 +68,19 @@ def p_expression_parens(p):
 
 def p_int_literal(p):
     'expression : NUMBER'
-    p[0] = Literal(Value('int', p[1]))
+    p[0] = Literal(Value('int', p[1], {}))
 
 
 def p_bool_literal(p):
     '''expression : TRUE
                   | FALSE
     '''
-    p[0] = Literal(Value('bool', p[1]))
+    p[0] = Literal(Value('bool', p[1], {}))
 
 
 def p_string_literal(p):
     'expression : STRING'
-    p[0] = Literal(Value('str', p[1]))
+    p[0] = Literal(Value('str', p[1], {}))
 
 
 def p_variable(p):

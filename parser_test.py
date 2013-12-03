@@ -6,15 +6,15 @@ from parser import create_parser
 
 
 def int_literal(int_value):
-    return Literal(Value('int', int_value))
+    return Literal(Value('int', int_value, {}))
 
 
 def string_literal(string_value):
-    return Literal(Value('str', string_value))
+    return Literal(Value('str', string_value, {}))
 
 
 def bool_literal(bool_value):
-    return Literal(Value('bool', bool_value))
+    return Literal(Value('bool', bool_value, {}))
 
 
 class ParserTest(unittest.TestCase):
@@ -81,7 +81,7 @@ class ParserTest(unittest.TestCase):
     def test_print(self):
         self.assert_ast(
             'print "Hello"',
-            PrintStatement(Literal(Value('str', 'Hello'))))
+            PrintStatement(string_literal('Hello')))
 
     def test_if(self):
         self.assert_ast(

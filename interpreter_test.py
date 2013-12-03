@@ -7,15 +7,15 @@ from parser import create_parser
 
 
 def int_value(int_val):
-    return Value('int', int_val)
+    return Value('int', int_val, {})
 
 
 def string_value(string_val):
-    return Value('str', string_val)
+    return Value('str', string_val, {})
 
 
 def bool_value(bool_val):
-    return Value('bool', bool_val)
+    return Value('bool', bool_val, {})
 
 
 class InterpreterTest(unittest.TestCase):

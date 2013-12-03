@@ -49,8 +49,12 @@ class Variable(namedtuple('Variable', ['name'])):
         return self.name
 
 
-# type is one of 'string' or 'int'
-# value is a python representation of that value
-class Value(namedtuple('Value', ['type', 'value'])):
+class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
+    """
+    * type is a pointer to the type.
+    * data refers to the "raw" data contained in this type, such as an
+    int, string, or AST. Only primitive-like objects have a value here.
+    * attributes is a dictionary of the direct attributes of the object.
+    """
     def pretty_print(self):
-        return str(self.value)
+        return str(self.data)

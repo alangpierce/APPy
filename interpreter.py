@@ -64,20 +64,20 @@ class ExecutionEnvironment(object):
     def execute_PrintStatement(self, statement):
         assert isinstance(statement, PrintStatement)
         value = self.evaluate_expression(statement.expr)
-        self.stdout_handler(str(value.value))
+        self.stdout_handler(str(value.data))
 
     def execute_IfStatement(self, statement):
         assert isinstance(statement, IfStatement)
         condition_value = self.evaluate_expression(statement.condition)
         # TODO: This is lame and hides the interesting stuff.
-        if condition_value.value:
+        if condition_value.data:
             self.execute_statement(statement.statement)
 
     def execute_WhileStatement(self, statement):
         assert isinstance(statement, WhileStatement)
         while True:
             condition_value = self.evaluate_expression(statement.condition)
-            if not condition_value.value:
+            if not condition_value.data:
                 break
             self.execute_statement(statement.statement)
 
@@ -125,8 +125,7 @@ class ExecutionEnvironment(object):
     }
 
     def evaluate_BinaryOperator(self, expression):
-        function_by_types = ExecutionEnvironment.BINARY_OPERATORS[
-            expression.operator]
+        function_by_types = self.BINARY_OPERATORS[expression.operator]
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
         try:
@@ -135,8 +134,8 @@ class ExecutionEnvironment(object):
             raise TypeError(
                 'unsupported operand type(s) for ' + expression.operator + ": '" +
                 left_value.type + "' and '" + right_value.type + "'")
-        (result_type, result_value) = func(left_value.value, right_value.value)
-        return Value(result_type, result_value)
+        (result_type, result_value) = func(left_value.data, right_value.data)
+        return Value(result_type, result_value, {})
 
     def evaluate_Literal(self, expression):
         return expression.value
