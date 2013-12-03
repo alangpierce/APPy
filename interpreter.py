@@ -14,7 +14,7 @@ class ExecutionEnvironment(object):
 
     def execute_statement(self, statement):
         try:
-            method = getattr(self, 'execute_' + statement.__class__.__name__)
+            method = getattr(self, '_execute_' + statement.__class__.__name__)
         except AttributeError:
             raise NotImplementedError(
                 'Missing handler for statement ' + str(statement))
@@ -22,7 +22,8 @@ class ExecutionEnvironment(object):
 
     def evaluate_expression(self, expression):
         try:
-            method = getattr(self, 'evaluate_' + expression.__class__.__name__)
+            method = getattr(
+                self, '_evaluate_' + expression.__class__.__name__)
         except AttributeError:
             raise NotImplementedError(
                 'Missing handler for expression ' + str(expression))
@@ -34,20 +35,20 @@ class ExecutionEnvironment(object):
     # expression, but only some expressions are valid assignables.
     def resolve_assignable(self, expression):
         try:
-            method = getattr(self, 'resolve_' + expression.__class__.__name__)
+            method = getattr(self, '_resolve_' + expression.__class__.__name__)
         except AttributeError:
             raise NotImplementedError(
                 'Missing handler for assignable ' + str(expression))
         return method(expression)
 
 
-    def execute_Seq(self, statement):
+    def _execute_Seq(self, statement):
         assert isinstance(statement, Seq)
         self.execute_statement(statement.left)
         self.execute_statement(statement.right)
 
 
-    def execute_Assignment(self, statement):
+    def _execute_Assignment(self, statement):
         assert isinstance(statement, Assignment)
         value = self.evaluate_expression(statement.right)
         assignable = self.resolve_assignable(statement.left)
@@ -57,23 +58,23 @@ class ExecutionEnvironment(object):
             raise NotImplementedError('Unexpected assignable type: ' +
                                       assignable.__class__.__name__)
 
-    def execute_ExpressionStatement(self, statement):
+    def _execute_ExpressionStatement(self, statement):
         assert isinstance(statement, ExpressionStatement)
         self.evaluate_expression(statement.expr)
 
-    def execute_PrintStatement(self, statement):
+    def _execute_PrintStatement(self, statement):
         assert isinstance(statement, PrintStatement)
         value = self.evaluate_expression(statement.expr)
         self.stdout_handler(str(value.data))
 
-    def execute_IfStatement(self, statement):
+    def _execute_IfStatement(self, statement):
         assert isinstance(statement, IfStatement)
         condition_value = self.evaluate_expression(statement.condition)
         # TODO: This is lame and hides the interesting stuff.
         if condition_value.data:
             self.execute_statement(statement.statement)
 
-    def execute_WhileStatement(self, statement):
+    def _execute_WhileStatement(self, statement):
         assert isinstance(statement, WhileStatement)
         while True:
             condition_value = self.evaluate_expression(statement.condition)
@@ -124,7 +125,7 @@ class ExecutionEnvironment(object):
         }
     }
 
-    def evaluate_BinaryOperator(self, expression):
+    def _evaluate_BinaryOperator(self, expression):
         function_by_types = self.BINARY_OPERATORS[expression.operator]
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
@@ -137,15 +138,15 @@ class ExecutionEnvironment(object):
         (result_type, result_value) = func(left_value.data, right_value.data)
         return Value(result_type, result_value, {})
 
-    def evaluate_Literal(self, expression):
+    def _evaluate_Literal(self, expression):
         return expression.value
 
-    def evaluate_Variable(self, expression):
+    def _evaluate_Variable(self, expression):
         assert isinstance(expression, Variable)
         try:
             return self.scope[expression.name]
         except KeyError:
             raise NameError('name ' + expression.name + ' is not defined')
 
-    def resolve_Variable(self, expression):
+    def _resolve_Variable(self, expression):
         return expression
