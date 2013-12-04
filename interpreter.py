@@ -1,5 +1,6 @@
 from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
                       Assignment, Variable, IfStatement, WhileStatement)
+from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
 
@@ -7,6 +8,7 @@ from parser import Parser
 class Interpreter(object):
     def __init__(self, stdout_handler):
         self.stdout_handler = stdout_handler
+        self.type_context = TypeContext()
 
     def execute_program(self, program):
         '''
@@ -15,8 +17,8 @@ class Interpreter(object):
         @type program: str
         @param program: Text of program to execute.
         '''
-        executor = ExecutionEnvironment(self.stdout_handler)
-        ast = self._parse(program)
+        executor = ExecutionEnvironment(self.stdout_handler, self.type_context)
+        ast = self._parse(program, self.type_context)
         executor.execute_statement(ast)
 
     def evaluate_expression(self, expression):
@@ -26,14 +28,14 @@ class Interpreter(object):
         @return: A native Python value corresponding to the evaluated
         value of the expression, which must be a native Python type.
         '''
-        executor = ExecutionEnvironment(self.stdout_handler)
-        ast = self._parse(expression)
+        executor = ExecutionEnvironment(self.stdout_handler, self.type_context)
+        ast = self._parse(expression, self.type_context)
         assert isinstance(ast, ExpressionStatement)
         expr_ast = ast.expr
         return executor.evaluate_expression(expr_ast)
 
-    def _parse(self, program):
-        parser = Parser()
+    def _parse(self, program, type_context):
+        parser = Parser(type_context)
         lexer = create_lexer()
         return parser.parse(program, lexer)
 
@@ -45,9 +47,13 @@ class ExecutionEnvironment(object):
     various types of expressions and statements.
     """
 
-    def __init__(self, stdout_handler):
+    def __init__(self, stdout_handler, type_context):
+        """
+        @type type_context: TypeContext
+        """
         self.stdout_handler = stdout_handler
         self.scope = {}
+        self.type_context = type_context
 
     def execute_statement(self, statement):
         try:
@@ -167,13 +173,19 @@ class ExecutionEnvironment(object):
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
         try:
-            func = function_by_types[(left_value.type, right_value.type)]
+            func = function_by_types[
+                (left_value.type.data, right_value.type.data)]
         except KeyError:
             raise TypeError(
-                'unsupported operand type(s) for ' + expression.operator + ": '" +
-                left_value.type + "' and '" + right_value.type + "'")
-        (result_type, result_value) = func(left_value.data, right_value.data)
-        return Value(result_type, result_value, {})
+                'unsupported operand type(s) for ' + expression.operator +
+                ": '" + left_value.type.data + "' and '" +
+                right_value.type.data + "'")
+        (result_type_name, result_value) = func(
+            left_value.data, right_value.data)
+        return Value(
+            getattr(self.type_context, result_type_name + '_type'),
+            result_value,
+            {})
 
     def _evaluate_Literal(self, expression):
         return expression.value

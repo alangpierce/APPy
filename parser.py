@@ -6,8 +6,12 @@ import lexer
 
 class Parser(object):
 
-    def __init__(self):
+    def __init__(self, type_context):
+        """
+        @type type_context: TypeContext
+        """
         self.yacc_parser = yacc.yacc(module=self)
+        self.type_context = type_context
 
     def parse(self, program, lexer):
         return self.yacc_parser.parse(program, lexer)
@@ -69,17 +73,17 @@ class Parser(object):
 
     def p_int_literal(self, p):
         'expression : NUMBER'
-        p[0] = Literal(Value('int', p[1], {}))
+        p[0] = Literal(Value(self.type_context.int_type, p[1], {}))
 
     def p_bool_literal(self, p):
         '''expression : TRUE
                       | FALSE
         '''
-        p[0] = Literal(Value('bool', p[1], {}))
+        p[0] = Literal(Value(self.type_context.bool_type, p[1], {}))
 
     def p_string_literal(self, p):
         'expression : STRING'
-        p[0] = Literal(Value('str', p[1], {}))
+        p[0] = Literal(Value(self.type_context.str_type, p[1], {}))
 
     def p_variable(self, p):
         'expression : ID'

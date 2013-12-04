@@ -1,51 +1,45 @@
 import unittest
+from appy_ast import Value
 
-from appy_ast import Value, ExpressionStatement
 from interpreter import ExecutionEnvironment, Interpreter
-from lexer import create_lexer
-from parser import Parser
-
-
-def int_value(int_val):
-    return Value('int', int_val, {})
-
-
-def string_value(string_val):
-    return Value('str', string_val, {})
-
-
-def bool_value(bool_val):
-    return Value('bool', bool_val, {})
-
 
 class InterpreterTest(unittest.TestCase):
+    def setUp(self):
+        self.stdout_builder = []
+        stdout_handler = lambda s: self.stdout_builder.append(s)
+        self.interpreter = Interpreter(stdout_handler)
+        self.type_context = self.interpreter.type_context
+
     def test_basic_interpreter(self):
-        self.assert_evaluate('5 + 3', int_value(8))
+        self.assert_evaluate('5 + 3', self.int_value(8))
 
     def test_order_of_operations(self):
-        self.assert_evaluate('1 + 2 * 3', int_value(7))
+        self.assert_evaluate('1 + 2 * 3', self.int_value(7))
 
     def test_parens(self):
-        self.assert_evaluate('5 / (1 + 1)', int_value(2))
+        self.assert_evaluate('5 / (1 + 1)', self.int_value(2))
 
     def test_string_concat(self):
-        self.assert_evaluate('"hello" + "world"', string_value('helloworld'))
+        self.assert_evaluate('"hello" + "world"',
+                             self.string_value('helloworld'))
 
     def test_string_subtract_is_illegal(self):
         self.assert_error(TypeError, '"hello" - "world"')
 
     def test_string_multiply_right(self):
-        self.assert_evaluate('"hello" * 3', string_value('hellohellohello'))
+        self.assert_evaluate('"hello" * 3',
+                             self.string_value('hellohellohello'))
 
     def test_string_multiply_left(self):
-        self.assert_evaluate('2 * "hello"', string_value('hellohello'))
+        self.assert_evaluate('2 * "hello"', self.string_value('hellohello'))
 
     def test_boolean_operators(self):
-        self.assert_evaluate('True or False and True', bool_value(True))
+        self.assert_evaluate('True or False and True', self.bool_value(True))
 
     def test_comparisons(self):
-        self.assert_evaluate('5 == 5 and 3 < 5 and 1 != 2', bool_value(True))
-        self.assert_evaluate('1 > 3 or 100 <= 10', bool_value(False))
+        self.assert_evaluate('5 == 5 and 3 < 5 and 1 != 2',
+                             self.bool_value(True))
+        self.assert_evaluate('1 > 3 or 100 <= 10', self.bool_value(False))
 
     def test_print(self):
         self.assert_execute('print "Hello"', "Hello")
@@ -96,12 +90,24 @@ print sum
     def evaluate_expression(self, expression):
         return Interpreter(lambda: None).evaluate_expression(expression)
 
+    def capture_stdout(self, func):
+        self.stdout_builder[:] = []
+        func()
+        return ''.join(self.stdout_builder)
+
     # Returns the output from stdout
     def execute_program(self, program):
-        stdout_builder = []
-        stdout_handler = lambda s: stdout_builder.append(s)
-        Interpreter(stdout_handler).execute_program(program)
-        return ''.join(stdout_builder)
+        return self.capture_stdout(
+            lambda: self.interpreter.execute_program(program))
+
+    def int_value(self, int_val):
+        return Value(self.type_context.int_type, int_val, {})
+
+    def string_value(self, string_val):
+        return Value(self.type_context.str_type, string_val, {})
+
+    def bool_value(self, bool_val):
+        return Value(self.type_context.bool_type, bool_val, {})
 
 
 if __name__ == '__main__':
