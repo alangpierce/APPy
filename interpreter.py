@@ -126,66 +126,28 @@ class ExecutionEnvironment(object):
             self.execute_statement(statement.statement)
 
     BINARY_OPERATORS = {
-        '+': {
-            ('int', 'int'): lambda a, b: ('int', a + b),
-            ('str', 'str'): lambda a, b: ('str', a + b),
-        },
-        '-': {
-            ('int', 'int'): lambda a, b: ('int', a - b),
-        },
-        '*': {
-            ('int', 'int'): lambda a, b: ('int', a * b),
-            ('str', 'int'): lambda a, b: ('str', a * b),
-            ('int', 'str'): lambda a, b: ('str', a * b),
-        },
-        '/': {
-            ('int', 'int'): lambda a, b: ('int', a / b),
-        },
-        '==': {
-            ('int', 'int'): lambda a, b: ('bool', a == b)
-        },
-        '!=': {
-            ('int', 'int'): lambda a, b: ('bool', a != b)
-        },
-        '<': {
-            ('int', 'int'): lambda a, b: ('bool', a < b)
-        },
-        '>': {
-            ('int', 'int'): lambda a, b: ('bool', a > b)
-        },
-        '<=': {
-            ('int', 'int'): lambda a, b: ('bool', a <= b)
-        },
-        '>=': {
-            ('int', 'int'): lambda a, b: ('bool', a >= b)
-        },
-        # TODO: Short circuit
-        'and': {
-            ('bool', 'bool'): lambda a, b: ('bool', a and b)
-        },
-        'or': {
-            ('bool', 'bool'): lambda a, b: ('bool', a or b)
-        }
+        '+': '__add__',
+        '-': '__sub__',
+        '*': '__mul__',
+        '/': '__floordiv__',
+        '==': '__eq__',
+        '!=': '__ne__',
+        '<': '__lt__',
+        '>': '__gt__',
+        '<=': '__le__',
+        '>=': '__ge__',
+        # TODO: short circuit
+        'and': '__and__',
+        'or': '__or__',
     }
 
     def _evaluate_BinaryOperator(self, expression):
-        function_by_types = self.BINARY_OPERATORS[expression.operator]
+        op_name = self.BINARY_OPERATORS[expression.operator]
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
-        try:
-            func = function_by_types[
-                (left_value.type.data, right_value.type.data)]
-        except KeyError:
-            raise TypeError(
-                'unsupported operand type(s) for ' + expression.operator +
-                ": '" + left_value.type.data + "' and '" +
-                right_value.type.data + "'")
-        (result_type_name, result_value) = func(
-            left_value.data, right_value.data)
-        return Value(
-            getattr(self.type_context, result_type_name + '_type'),
-            result_value,
-            {})
+        op_function_value = self._evaluate_attribute(left_value, op_name)
+        return self._evaluate_function(
+            op_function_value, left_value, right_value)
 
     def _evaluate_Literal(self, expression):
         return expression.value
@@ -196,6 +158,31 @@ class ExecutionEnvironment(object):
             return self.scope[expression.name]
         except KeyError:
             raise NameError('name ' + expression.name + ' is not defined')
+
+    def _evaluate_attribute(self, object_value, attribute_name):
+        """
+        Resolves an attribute on the given object, which includes
+        checking attributes on the type and supertypes if necessary.
+        @type object_value: Value
+        @type attribute_name: str
+        """
+        try:
+            return object_value.attributes[attribute_name]
+        except KeyError:
+            try:
+                return object_value.type.attributes[attribute_name]
+            except KeyError:
+                raise TypeError('Attribute ' + attribute_name +
+                                ' does not exist on this type.')
+
+    def _evaluate_function(self, func, *args):
+        """
+        Given a function value, executes it with the given value
+        arguments.
+        @type args: should only contain elements of type Value
+        @type func: Value
+        """
+        return func.data(*args)
 
     def _resolve_Variable(self, expression):
         return expression

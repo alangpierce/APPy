@@ -78,6 +78,8 @@ print sum
         )
 
     def assert_evaluate(self, program, expected_value):
+        # TODO: I'm pretty sure this is doing deep equality on the
+        # type, which it probably shouldn't do.
         self.assertEqual(expected_value, self.evaluate_expression(program))
 
     def assert_execute(self, program, expected_stdout):
@@ -88,7 +90,7 @@ print sum
         self.assertRaises(exception_type, self.execute_program, program)
 
     def evaluate_expression(self, expression):
-        return Interpreter(lambda: None).evaluate_expression(expression)
+        return self.interpreter.evaluate_expression(expression)
 
     def capture_stdout(self, func):
         self.stdout_builder[:] = []
