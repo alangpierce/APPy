@@ -22,13 +22,24 @@ class PrintStatement(namedtuple('PrintStatement', ['expr'])):
 
 class IfStatement(namedtuple('IfStatement', ['condition', 'statement'])):
     def pretty_print(self):
-        return 'if ' + self.condition.pretty_print() + ':\n\t' +\
-               self.statement.pretty_print()
+        return ('if ' + self.condition.pretty_print() + ':\n\t' +
+                self.statement.pretty_print())
+
 
 class WhileStatement(namedtuple('WhileStatement', ['condition', 'statement'])):
     def pretty_print(self):
-        return 'while ' + self.condition.pretty_print() + ':\n\t' +\
-               self.statement.pretty_print()
+        return ('while ' + self.condition.pretty_print() + ':\n\t' +
+                self.statement.pretty_print())
+
+
+class DefStatement(namedtuple('DefStatement', ['name', 'arg_names', 'body'])):
+    """
+    arg_names is a list of strings for the argument names.
+    body is any statement.
+    """
+    def pretty_print(self):
+        return ('def ' + self.name + '(' + ','.join(self.arg_names) + '):\n' +
+                '\t' + self.body.pretty_print())
 
 
 class BinaryOperator(namedtuple('BinaryOperator',

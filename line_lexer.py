@@ -26,6 +26,7 @@ class LineLexer(object):
         'or': 'OR',
         'not': 'NOT',
         'print': 'PRINT',
+        'def': 'DEF',
     }
 
     tokens = [
@@ -44,6 +45,7 @@ class LineLexer(object):
         'RPAREN',
         'ASSIGN',
         'COLON',
+        'COMMA',
         'STRING',
         'ID',
     ] + reserved_words.values()
@@ -62,6 +64,7 @@ class LineLexer(object):
     t_RPAREN = r'\)'
     t_ASSIGN = r'='
     t_COLON = r':'
+    t_COMMA = r','
 
     def string_regex(delimiter):
         return ('[uUbB]?[Rr]?' +

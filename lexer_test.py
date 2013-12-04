@@ -12,6 +12,7 @@ minus = ('MINUS', '-')
 times = ('TIMES', '*')
 dividedby = ('DIVIDEDBY', '/')
 equals = ('EQUALS', '==')
+assign = ('ASSIGN', '=')
 lparen = ('LPAREN', '(')
 rparen = ('RPAREN', ')')
 def string(s):
@@ -19,10 +20,12 @@ def string(s):
 if_token = ('IF', 'if')
 while_token = ('WHILE', 'while')
 colon = ('COLON', ':')
+comma = ('COMMA', ',')
 newline = ('NEWLINE', '')
 indent = ('INDENT', '')
 dedent = ('DEDENT', '')
 print_token = ('PRINT', 'print')
+def_token = ('DEF', 'def')
 
 class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
@@ -115,6 +118,16 @@ class LexerTest(unittest.TestCase):
         self.assert_tokens(
             'print "Hello"',
             [print_token, string('Hello'), newline])
+
+    def test_function_def(self):
+        self.assert_tokens(
+            '''
+def blah(a, b, c):
+    x = 5''',
+            [def_token, ident('blah'), lparen, ident('a'), comma, ident('b'),
+             comma, ident('c'), rparen, colon, newline, indent, ident('x'),
+             assign, num(5), newline, dedent]
+        )
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)

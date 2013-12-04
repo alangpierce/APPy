@@ -1,6 +1,6 @@
 from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
-                      Seq, ExpressionStatement, PrintStatement, IfStatement, WhileStatement)
+                      Seq, ExpressionStatement, PrintStatement, IfStatement, WhileStatement, DefStatement)
 import lexer
 
 
@@ -28,31 +28,49 @@ class Parser(object):
     )
 
     def p_seq(self, p):
-        '''statement : statement statement'''
+        """statement : statement statement"""
         p[0] = Seq(p[1], p[2])
 
     def p_expression_statement(self, p):
-        '''statement : expression NEWLINE'''
+        """statement : expression NEWLINE"""
         p[0] = ExpressionStatement(p[1])
 
     def p_assignment_statement(self, p):
-        '''statement : expression ASSIGN expression NEWLINE'''
+        """statement : expression ASSIGN expression NEWLINE"""
         p[0] = Assignment(p[1], p[3])
 
     def p_print_statement(self, p):
-        '''statement : PRINT expression NEWLINE'''
+        """statement : PRINT expression NEWLINE"""
         p[0] = PrintStatement(p[2])
 
     def p_if_statement(self, p):
-        '''statement : IF expression COLON NEWLINE INDENT statement DEDENT'''
+        """statement : IF expression COLON NEWLINE INDENT statement DEDENT"""
         p[0] = IfStatement(p[2], p[6])
 
     def p_while_statement(self, p):
-        '''statement : WHILE expression COLON NEWLINE INDENT statement DEDENT'''
+        """statement : WHILE expression COLON NEWLINE \
+                       INDENT statement DEDENT"""
         p[0] = WhileStatement(p[2], p[6])
 
-    def p_expression_plus(self, p):
-        '''expression : expression PLUS expression
+    def p_def_statement(self, p):
+        """statement : DEF ID LPAREN arglist RPAREN COLON NEWLINE \
+                       INDENT statement DEDENT """
+        p[0] = DefStatement(p[2], p[4], p[9])
+
+    def p_arglist(self, p):
+        """arglist : ID COMMA arglist
+                   | ID
+                   |
+        """
+        if len(p) == 1:
+            p[0] = []
+        elif len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = [p[1]] + p[3]
+
+    def p_expression_binary(self, p):
+        """expression : expression PLUS expression
                       | expression MINUS expression
                       | expression TIMES expression
                       | expression DIVIDEDBY expression
@@ -64,29 +82,29 @@ class Parser(object):
                       | expression GREATERTHANOREQUAL expression
                       | expression AND expression
                       | expression OR expression
-        '''
+        """
         p[0] = BinaryOperator(p[2], p[1], p[3])
 
     def p_expression_parens(self, p):
-        'expression : LPAREN expression RPAREN'
+        """expression : LPAREN expression RPAREN"""
         p[0] = p[2]
 
     def p_int_literal(self, p):
-        'expression : NUMBER'
+        """expression : NUMBER"""
         p[0] = Literal(Value(self.type_context.int_type, p[1], {}))
 
     def p_bool_literal(self, p):
-        '''expression : TRUE
+        """expression : TRUE
                       | FALSE
-        '''
+        """
         p[0] = Literal(Value(self.type_context.bool_type, p[1], {}))
 
     def p_string_literal(self, p):
-        'expression : STRING'
+        """expression : STRING"""
         p[0] = Literal(Value(self.type_context.str_type, p[1], {}))
 
     def p_variable(self, p):
-        'expression : ID'
+        """expression : ID"""
         p[0] = Variable(p[1])
 
     def p_error(self, p):
