@@ -2,7 +2,7 @@ import unittest
 
 from appy_ast import (BinaryOperator, Literal, Value, ExpressionStatement,
                       PrintStatement, IfStatement, Assignment, Variable,
-                      WhileStatement, DefStatement)
+                      WhileStatement, DefStatement, FunctionCall)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -111,6 +111,15 @@ def foo(x):
     print x''',
             DefStatement('foo', ['x'], PrintStatement(Variable('x'))))
 
+    def test_function_call(self):
+        self.assert_ast(
+            'foo(bar, 7, x + 5)',
+            ExpressionStatement(FunctionCall(
+                Variable('foo'),
+                [Variable('bar'), self.int_literal(7),
+                 BinaryOperator('+', Variable('x'), self.int_literal(5))]))
+        )
+
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)
         self.assertEqual(expected_ast, actual_ast,
@@ -133,7 +142,6 @@ def foo(x):
 
     def bool_literal(self, bool_value):
         return Literal(Value(self.type_context.bool_type, bool_value, {}))
-
 
 
 if __name__ == '__main__':

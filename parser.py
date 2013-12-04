@@ -1,6 +1,7 @@
 from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
-                      Seq, ExpressionStatement, PrintStatement, IfStatement, WhileStatement, DefStatement)
+                      Seq, ExpressionStatement, PrintStatement, IfStatement,
+                      WhileStatement, DefStatement, FunctionCall)
 import lexer
 
 
@@ -53,12 +54,15 @@ class Parser(object):
         p[0] = WhileStatement(p[2], p[6])
 
     def p_def_statement(self, p):
-        """statement : DEF ID LPAREN arglist RPAREN COLON NEWLINE \
+        """statement : DEF ID LPAREN paramlist RPAREN COLON NEWLINE \
                        INDENT statement DEDENT """
         p[0] = DefStatement(p[2], p[4], p[9])
 
-    def p_arglist(self, p):
-        """arglist : ID COMMA arglist
+    # Note the technical distinction between "parameter" and "argument"
+    # here: parameters are identifiers declared as part of a function,
+    # while arguments are expressions given in function calls.
+    def p_paramlist(self, p):
+        """paramlist : ID COMMA paramlist
                    | ID
                    |
         """
@@ -106,6 +110,23 @@ class Parser(object):
     def p_variable(self, p):
         """expression : ID"""
         p[0] = Variable(p[1])
+
+    def p_function_call(self, p):
+        """expression : expression LPAREN arglist RPAREN"""
+        p[0] = FunctionCall(p[1], p[3])
+
+    # List of comma-separated expressions
+    def p_arglist(self, p):
+        """arglist : expression COMMA arglist
+                   | expression
+                   |
+        """
+        if len(p) == 1:
+            p[0] = []
+        elif len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = [p[1]] + p[3]
 
     def p_error(self, p):
         raise SyntaxError("Syntax error: " + str(p))

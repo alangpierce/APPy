@@ -32,14 +32,15 @@ class WhileStatement(namedtuple('WhileStatement', ['condition', 'statement'])):
                 self.statement.pretty_print())
 
 
-class DefStatement(namedtuple('DefStatement', ['name', 'arg_names', 'body'])):
+class DefStatement(namedtuple('DefStatement',
+                              ['name', 'param_names', 'body'])):
     """
-    arg_names is a list of strings for the argument names.
+    param_names is a list of strings for the parameter names.
     body is any statement.
     """
     def pretty_print(self):
-        return ('def ' + self.name + '(' + ','.join(self.arg_names) + '):\n' +
-                '\t' + self.body.pretty_print())
+        return ('def ' + self.name + '(' + ','.join(self.param_names) +
+                '):\n\t' + self.body.pretty_print())
 
 
 class BinaryOperator(namedtuple('BinaryOperator',
@@ -58,6 +59,12 @@ class Literal(namedtuple('Literal', ['value'])):
 class Variable(namedtuple('Variable', ['name'])):
     def pretty_print(self):
         return self.name
+
+
+class FunctionCall(namedtuple('FunctionCall', ['function_expr', 'args'])):
+    def pretty_print(self):
+        return (self.function_expr.pretty_print() + '(' +
+                ','.join(arg.pretty_print() for arg in self.args) + ')')
 
 
 class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
