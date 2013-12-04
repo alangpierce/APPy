@@ -1,5 +1,6 @@
 from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
-                      Assignment, Variable, IfStatement, WhileStatement)
+                      Assignment, Variable, IfStatement, WhileStatement,
+                      DefStatement, FunctionData, FunctionCall)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -125,6 +126,12 @@ class ExecutionEnvironment(object):
                 break
             self.execute_statement(statement.statement)
 
+    def _execute_DefStatement(self, statement):
+        assert isinstance(statement, DefStatement)
+        self.scope[statement.name] = Value(
+            self.type_context.function_type,
+            FunctionData(statement.param_names, statement.body), {})
+
     BINARY_OPERATORS = {
         '+': '__add__',
         '-': '__sub__',
@@ -159,6 +166,12 @@ class ExecutionEnvironment(object):
         except KeyError:
             raise NameError('name ' + expression.name + ' is not defined')
 
+    def _evaluate_FunctionCall(self, expression):
+        assert isinstance(expression, FunctionCall)
+        function_value = self.evaluate_expression(expression.function_expr)
+        arg_values = [self.evaluate_expression(arg) for arg in expression.args]
+        return self._evaluate_function(function_value, *arg_values)
+
     def _evaluate_attribute(self, object_value, attribute_name):
         """
         Resolves an attribute on the given object, which includes
@@ -182,7 +195,19 @@ class ExecutionEnvironment(object):
         @type args: should only contain elements of type Value
         @type func: Value
         """
-        return func.data(*args)
+        # Built-in functions use a regular python function.
+        # User-defined functions use a FunctionData structure.
+        data = func.data
+        if isinstance(data, FunctionData):
+            # TODO: Handle scopes correctly by maintaining a scope chain.
+            new_environment = ExecutionEnvironment(self.stdout_handler,
+                                                   self.type_context)
+            for name, value in zip(data.param_names, args):
+                new_environment.scope[name] = value
+            # TODO: Return values
+            new_environment.execute_statement(data.body)
+        else:
+            return data(*args)
 
     def _resolve_Variable(self, expression):
         return expression

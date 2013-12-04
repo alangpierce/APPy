@@ -76,3 +76,7 @@ class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
     """
     def pretty_print(self):
         return str(self.data)
+
+
+class FunctionData(namedtuple('FunctionData', ['param_names', 'body'])):
+    pass

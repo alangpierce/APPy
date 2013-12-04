@@ -77,6 +77,14 @@ print sum
         '55'
         )
 
+    def test_function_call(self):
+        self.assert_execute(
+            '''
+def foo(x):
+    print x
+foo(3)''',
+            '3')
+
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the
         # type, which it probably shouldn't do.
