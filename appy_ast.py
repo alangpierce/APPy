@@ -1,4 +1,5 @@
 from collections import namedtuple
+from scope import ScopeChain
 
 
 class Seq(namedtuple('Seq', ['left', 'right'])):
@@ -78,5 +79,6 @@ class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
         return str(self.data)
 
 
-class FunctionData(namedtuple('FunctionData', ['param_names', 'body'])):
+class FunctionData(namedtuple('FunctionData',
+                              ['param_names', 'body', 'parent_scope'])):
     pass

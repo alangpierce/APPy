@@ -6,7 +6,7 @@ from interpreter import ExecutionEnvironment, Interpreter
 class InterpreterTest(unittest.TestCase):
     def setUp(self):
         self.stdout_builder = []
-        stdout_handler = lambda s: self.stdout_builder.append(s)
+        stdout_handler = lambda s: self.stdout_builder.append(s + '\n')
         self.interpreter = Interpreter(stdout_handler)
         self.type_context = self.interpreter.type_context
 
@@ -42,7 +42,7 @@ class InterpreterTest(unittest.TestCase):
         self.assert_evaluate('1 > 3 or 100 <= 10', self.bool_value(False))
 
     def test_print(self):
-        self.assert_execute('print "Hello"', "Hello")
+        self.assert_execute('print "Hello"', "Hello\n")
 
     def test_assignment(self):
         self.assert_execute(
@@ -50,7 +50,7 @@ class InterpreterTest(unittest.TestCase):
 x = 5
 print x + 3
 ''',
-            '8')
+            '8\n')
 
     def test_illegal_variable(self):
         self.assert_error(NameError, 'foo + 5')
@@ -62,7 +62,7 @@ x = 7
 if x > 5:
     print 'Greater'
 ''',
-        'Greater')
+        'Greater\n')
 
     def test_while(self):
         self.assert_execute(
@@ -74,7 +74,7 @@ while i <= 10:
     i = i + 1
 print sum
 ''',
-        '55'
+        '55\n'
         )
 
     def test_function_call(self):
@@ -83,7 +83,40 @@ print sum
 def foo(x):
     print x
 foo(3)''',
-            '3')
+            '3\n')
+
+    def test_closure(self):
+        self.assert_execute(
+            '''
+x = 5
+def print_num():
+    print x
+print_num()''',
+            '5\n')
+
+    def test_modify_outer_scope(self):
+        self.assert_execute(
+            '''
+x = 1
+def print_num():
+    print x
+print_num()
+x = 2
+print_num()''',
+            '1\n2\n'
+        )
+
+    def test_out_of_scope_access(self):
+        self.assert_error(NameError, '''
+def foo():
+    print x
+
+def bar():
+    x = 5
+    foo()
+
+bar()
+''')
 
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the

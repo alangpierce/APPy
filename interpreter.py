@@ -4,6 +4,7 @@ from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
+from scope import ScopeChain
 
 
 class Interpreter(object):
@@ -41,20 +42,21 @@ class Interpreter(object):
         return parser.parse(program, lexer)
 
 
-
 class ExecutionEnvironment(object):
     """Tracks all state that needs to be tracked during regular
     execution, and contains the implementation of the handlers for the
     various types of expressions and statements.
     """
 
-    def __init__(self, stdout_handler, type_context):
+    def __init__(self, stdout_handler, type_context, scope_chain=None):
         """
         @type type_context: TypeContext
         """
+        if scope_chain is None:
+            scope_chain = ScopeChain()
         self.stdout_handler = stdout_handler
-        self.scope = {}
         self.type_context = type_context
+        self.scope_chain = scope_chain
 
     def execute_statement(self, statement):
         try:
@@ -97,7 +99,7 @@ class ExecutionEnvironment(object):
         value = self.evaluate_expression(statement.right)
         assignable = self.resolve_assignable(statement.left)
         if isinstance(assignable, Variable):
-            self.scope[assignable.name] = value
+            self.scope_chain.assign_name(assignable.name, value)
         else:
             raise NotImplementedError('Unexpected assignable type: ' +
                                       assignable.__class__.__name__)
@@ -128,9 +130,11 @@ class ExecutionEnvironment(object):
 
     def _execute_DefStatement(self, statement):
         assert isinstance(statement, DefStatement)
-        self.scope[statement.name] = Value(
+        self.scope_chain.assign_name(statement.name, Value(
             self.type_context.function_type,
-            FunctionData(statement.param_names, statement.body), {})
+            FunctionData(
+                statement.param_names, statement.body, self.scope_chain),
+            {}))
 
     BINARY_OPERATORS = {
         '+': '__add__',
@@ -161,10 +165,7 @@ class ExecutionEnvironment(object):
 
     def _evaluate_Variable(self, expression):
         assert isinstance(expression, Variable)
-        try:
-            return self.scope[expression.name]
-        except KeyError:
-            raise NameError('name ' + expression.name + ' is not defined')
+        return self.scope_chain.resolve_name(expression.name)
 
     def _evaluate_FunctionCall(self, expression):
         assert isinstance(expression, FunctionCall)
@@ -199,11 +200,10 @@ class ExecutionEnvironment(object):
         # User-defined functions use a FunctionData structure.
         data = func.data
         if isinstance(data, FunctionData):
-            # TODO: Handle scopes correctly by maintaining a scope chain.
-            new_environment = ExecutionEnvironment(self.stdout_handler,
-                                                   self.type_context)
-            for name, value in zip(data.param_names, args):
-                new_environment.scope[name] = value
+            new_scope = data.parent_scope.with_pushed_mappings(
+                {name: value for (name, value) in zip(data.param_names, args)})
+            new_environment = ExecutionEnvironment(
+                self.stdout_handler, self.type_context, new_scope)
             # TODO: Return values
             new_environment.execute_statement(data.body)
         else:
