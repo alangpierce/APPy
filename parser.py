@@ -1,7 +1,8 @@
 from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
                       Seq, ExpressionStatement, PrintStatement, IfStatement,
-                      WhileStatement, DefStatement, FunctionCall)
+                      WhileStatement, DefStatement, FunctionCall,
+                      ClassStatement)
 import lexer
 
 
@@ -57,6 +58,12 @@ class Parser(object):
         """statement : DEF ID LPAREN paramlist RPAREN COLON NEWLINE \
                        INDENT statement DEDENT """
         p[0] = DefStatement(p[2], p[4], p[9])
+
+    # TODO: Multiple superclasses
+    def p_class_statement(self, p):
+        """statement : CLASS ID LPAREN expression RPAREN COLON NEWLINE \
+                       INDENT statement DEDENT """
+        p[0] = ClassStatement(p[2], p[4], p[9])
 
     # Note the technical distinction between "parameter" and "argument"
     # here: parameters are identifiers declared as part of a function,

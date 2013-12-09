@@ -27,6 +27,7 @@ class LineLexer(object):
         'not': 'NOT',
         'print': 'PRINT',
         'def': 'DEF',
+        'class': 'CLASS'
     }
 
     tokens = [

@@ -26,6 +26,7 @@ indent = ('INDENT', '')
 dedent = ('DEDENT', '')
 print_token = ('PRINT', 'print')
 def_token = ('DEF', 'def')
+class_token = ('CLASS', 'class')
 
 class LexerTest(unittest.TestCase):
     def test_simple_tokens(self):
@@ -127,6 +128,15 @@ def blah(a, b, c):
             [def_token, ident('blah'), lparen, ident('a'), comma, ident('b'),
              comma, ident('c'), rparen, colon, newline, indent, ident('x'),
              assign, num(5), newline, dedent]
+        )
+
+    def test_class(self):
+        self.assert_tokens(
+            '''
+class Foo(object):
+    x = 5''',
+            [class_token, ident('Foo'), lparen, ident('object'), rparen, colon,
+             newline, indent, ident('x'), assign, num(5), newline, dedent]
         )
 
     def assert_tokens(self, program, expected_tokens):

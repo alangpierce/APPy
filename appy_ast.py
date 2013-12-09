@@ -3,7 +3,8 @@ from scope import ScopeChain
 
 
 class Seq(namedtuple('Seq', ['left', 'right'])):
-    pass
+    def pretty_print(self):
+        return self.left.pretty_print() + '\n' + self.right.pretty_print()
 
 
 class Assignment(namedtuple('Assignment', ['left', 'right'])):
@@ -42,6 +43,13 @@ class DefStatement(namedtuple('DefStatement',
     def pretty_print(self):
         return ('def ' + self.name + '(' + ','.join(self.param_names) +
                 '):\n\t' + self.body.pretty_print())
+
+
+class ClassStatement(namedtuple('ClassStatement',
+                                ['name', 'superclass', 'body'])):
+    def pretty_print(self):
+        return ('class ' + self.name + '(' + self.superclass.pretty_print() +
+            '):\n\t' + self.body.pretty_print())
 
 
 class BinaryOperator(namedtuple('BinaryOperator',

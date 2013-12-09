@@ -2,7 +2,8 @@ import unittest
 
 from appy_ast import (BinaryOperator, Literal, Value, ExpressionStatement,
                       PrintStatement, IfStatement, Assignment, Variable,
-                      WhileStatement, DefStatement, FunctionCall)
+                      WhileStatement, DefStatement, FunctionCall, Seq,
+                      ClassStatement)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -118,6 +119,18 @@ def foo(x):
                 Variable('foo'),
                 [Variable('bar'), self.int_literal(7),
                  BinaryOperator('+', Variable('x'), self.int_literal(5))]))
+        )
+
+    def test_class_definition(self):
+        self.assert_ast(
+            '''
+class Blah(object):
+    x = 5
+foo = Blah()''',
+            Seq(ClassStatement('Blah', Variable('object'),
+                               Assignment(Variable('x'), self.int_literal(5))),
+                Assignment(Variable('foo'), FunctionCall(Variable('Blah'), []))
+            )
         )
 
     def assert_ast(self, program, expected_ast):
