@@ -3,7 +3,7 @@ import unittest
 from appy_ast import (BinaryOperator, Literal, Value, ExpressionStatement,
                       PrintStatement, IfStatement, Assignment, Variable,
                       WhileStatement, DefStatement, FunctionCall, Seq,
-                      ClassStatement, PassStatement)
+                      ClassStatement, PassStatement, AttributeAccess)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -145,11 +145,32 @@ foo = Blah()''',
             )
         )
 
+    def test_attribute_access(self):
+        self.assert_ast(
+            '''
+print a.b()
+print 'hello' + 'world'.capitalize()
+print ('foo' + 'bar').capitalize()''',
+            Seq(
+                PrintStatement(
+                    FunctionCall(AttributeAccess(Variable('a'), 'b'), [])),
+                Seq(
+                    PrintStatement(BinaryOperator(
+                        '+',
+                        self.string_literal('hello'),
+                        FunctionCall(AttributeAccess(
+                            self.string_literal('world'), 'capitalize'), []))),
+                    PrintStatement(FunctionCall(AttributeAccess(
+                        BinaryOperator(
+                            '+', self.string_literal('foo'),
+                            self.string_literal('bar')), 'capitalize'),
+                        [])))))
+
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)
         self.assertEqual(expected_ast, actual_ast,
-                         "Expected: " + expected_ast.pretty_print() +
-                         ", Actual: " + actual_ast.pretty_print(), )
+                         "\nExpected:\n" + expected_ast.pretty_print() +
+                         "\n\nActual:\n" + actual_ast.pretty_print(), )
 
     def assert_ast_expression(self, program, expected_ast_expression):
         self.assert_ast(program, ExpressionStatement(expected_ast_expression))

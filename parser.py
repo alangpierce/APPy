@@ -2,7 +2,7 @@ from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
                       Seq, ExpressionStatement, PrintStatement, IfStatement,
                       WhileStatement, DefStatement, FunctionCall,
-                      ClassStatement, PassStatement)
+                      ClassStatement, PassStatement, AttributeAccess)
 import lexer
 
 
@@ -27,6 +27,10 @@ class Parser(object):
          'LESSTHANOREQUAL', 'GREATERTHANOREQUAL'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDEDBY'),
+        # The LPAREN token is for function calls. The PLY documentation
+        # says that either RPAREN or a custom token would work, but it
+        # appears that neither of them do.
+        ('left', 'DOT', 'LPAREN'),
     )
 
     def p_seq(self, p):
@@ -103,6 +107,10 @@ class Parser(object):
     def p_expression_parens(self, p):
         """expression : LPAREN expression RPAREN"""
         p[0] = p[2]
+
+    def p_attribute_access(self, p):
+        """expression : expression DOT ID"""
+        p[0] = AttributeAccess(p[1], p[3])
 
     def p_int_literal(self, p):
         """expression : NUMBER"""

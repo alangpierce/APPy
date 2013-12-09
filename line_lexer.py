@@ -45,6 +45,7 @@ class LineLexer(object):
         'GREATERTHANOREQUAL',
         'LPAREN',
         'RPAREN',
+        'DOT',
         'ASSIGN',
         'COLON',
         'COMMA',
@@ -64,6 +65,7 @@ class LineLexer(object):
     t_GREATERTHANOREQUAL = r'>='
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
+    t_DOT = r'\.'
     t_ASSIGN = r'='
     t_COLON = r':'
     t_COMMA = r','

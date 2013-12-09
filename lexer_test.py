@@ -15,6 +15,7 @@ equals = ('EQUALS', '==')
 assign = ('ASSIGN', '=')
 lparen = ('LPAREN', '(')
 rparen = ('RPAREN', ')')
+dot = ('DOT', '.')
 def string(s):
     return ('STRING', s)
 if_token = ('IF', 'if')
@@ -128,8 +129,7 @@ def blah(a, b, c):
     x = 5''',
             [def_token, ident('blah'), lparen, ident('a'), comma, ident('b'),
              comma, ident('c'), rparen, colon, newline, indent, ident('x'),
-             assign, num(5), newline, dedent]
-        )
+             assign, num(5), newline, dedent])
 
     def test_pass(self):
         self.assert_tokens(
@@ -138,8 +138,7 @@ pass
 def blah():
     pass''',
             [pass_token, newline, def_token, ident('blah'), lparen, rparen,
-             colon, newline, indent, pass_token, newline, dedent]
-        )
+             colon, newline, indent, pass_token, newline, dedent])
 
     def test_class(self):
         self.assert_tokens(
@@ -147,8 +146,15 @@ def blah():
 class Foo(object):
     x = 5''',
             [class_token, ident('Foo'), lparen, ident('object'), rparen, colon,
-             newline, indent, ident('x'), assign, num(5), newline, dedent]
-        )
+             newline, indent, ident('x'), assign, num(5), newline, dedent])
+
+    def test_dot(self):
+        self.assert_tokens(
+            '''
+x.foo()
+Bar.test''',
+            [ident('x'), dot, ident('foo'), lparen, rparen, newline,
+             ident('Bar'), dot, ident('test'), newline])
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)

@@ -81,6 +81,11 @@ class FunctionCall(namedtuple('FunctionCall', ['function_expr', 'args'])):
                 ','.join(arg.pretty_print() for arg in self.args) + ')')
 
 
+class AttributeAccess(namedtuple('AttributeAccess', ['expr', 'attr_name'])):
+    def pretty_print(self):
+        return self.expr.pretty_print() + '.' + self.attr_name
+
+
 class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
     """
     * type is a pointer to the type.
