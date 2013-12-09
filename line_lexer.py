@@ -25,6 +25,7 @@ class LineLexer(object):
         'and': 'AND',
         'or': 'OR',
         'not': 'NOT',
+        'pass': 'PASS',
         'print': 'PRINT',
         'def': 'DEF',
         'class': 'CLASS'

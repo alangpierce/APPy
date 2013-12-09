@@ -17,6 +17,11 @@ class ExpressionStatement(namedtuple('ExpressionStatement', ['expr'])):
         return self.expr.pretty_print()
 
 
+class PassStatement(namedtuple('PassStatement', [])):
+    def pretty_print(self):
+        return 'pass'
+
+
 class PrintStatement(namedtuple('PrintStatement', ['expr'])):
     def pretty_print(self):
         return 'print ' + self.expr.pretty_print()

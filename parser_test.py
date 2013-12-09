@@ -3,7 +3,7 @@ import unittest
 from appy_ast import (BinaryOperator, Literal, Value, ExpressionStatement,
                       PrintStatement, IfStatement, Assignment, Variable,
                       WhileStatement, DefStatement, FunctionCall, Seq,
-                      ClassStatement)
+                      ClassStatement, PassStatement)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -111,6 +111,18 @@ def test():
 def foo(x):
     print x''',
             DefStatement('foo', ['x'], PrintStatement(Variable('x'))))
+
+    def test_pass(self):
+        self.assert_ast(
+            '''
+pass
+def foo():
+    pass
+    print 5''',
+            Seq(PassStatement(),
+                DefStatement('foo', [],
+                             Seq(PassStatement(),
+                                 PrintStatement(self.int_literal(5))))))
 
     def test_function_call(self):
         self.assert_ast(

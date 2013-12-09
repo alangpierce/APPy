@@ -85,6 +85,19 @@ def foo(x):
 foo(3)''',
             '3\n')
 
+    def test_pass(self):
+        self.assert_execute(
+            '''
+pass
+def foo1():
+    pass
+def foo2():
+    pass
+    print 5
+foo1()
+foo2()''',
+            '5\n')
+
     def test_closure(self):
         self.assert_execute(
             '''

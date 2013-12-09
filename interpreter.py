@@ -108,6 +108,9 @@ class ExecutionEnvironment(object):
         assert isinstance(statement, ExpressionStatement)
         self.evaluate_expression(statement.expr)
 
+    def _execute_PassStatement(self, statement):
+        pass
+
     def _execute_PrintStatement(self, statement):
         assert isinstance(statement, PrintStatement)
         value = self.evaluate_expression(statement.expr)

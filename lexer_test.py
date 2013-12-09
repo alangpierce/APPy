@@ -24,6 +24,7 @@ comma = ('COMMA', ',')
 newline = ('NEWLINE', '')
 indent = ('INDENT', '')
 dedent = ('DEDENT', '')
+pass_token = ('PASS', 'pass')
 print_token = ('PRINT', 'print')
 def_token = ('DEF', 'def')
 class_token = ('CLASS', 'class')
@@ -128,6 +129,16 @@ def blah(a, b, c):
             [def_token, ident('blah'), lparen, ident('a'), comma, ident('b'),
              comma, ident('c'), rparen, colon, newline, indent, ident('x'),
              assign, num(5), newline, dedent]
+        )
+
+    def test_pass(self):
+        self.assert_tokens(
+            '''
+pass
+def blah():
+    pass''',
+            [pass_token, newline, def_token, ident('blah'), lparen, rparen,
+             colon, newline, indent, pass_token, newline, dedent]
         )
 
     def test_class(self):

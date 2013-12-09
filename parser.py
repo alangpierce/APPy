@@ -2,7 +2,7 @@ from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
                       Seq, ExpressionStatement, PrintStatement, IfStatement,
                       WhileStatement, DefStatement, FunctionCall,
-                      ClassStatement)
+                      ClassStatement, PassStatement)
 import lexer
 
 
@@ -40,6 +40,10 @@ class Parser(object):
     def p_assignment_statement(self, p):
         """statement : expression ASSIGN expression NEWLINE"""
         p[0] = Assignment(p[1], p[3])
+
+    def p_pass_statement(self, p):
+        """statement : PASS NEWLINE"""
+        p[0] = PassStatement()
 
     def p_print_statement(self, p):
         """statement : PRINT expression NEWLINE"""
