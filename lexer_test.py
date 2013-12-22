@@ -15,6 +15,8 @@ equals = ('EQUALS', '==')
 assign = ('ASSIGN', '=')
 lparen = ('LPAREN', '(')
 rparen = ('RPAREN', ')')
+lbracket = ('LBRACKET', '[')
+rbracket = ('RBRACKET', ']')
 dot = ('DOT', '.')
 def string(s):
     return ('STRING', s)
@@ -155,6 +157,15 @@ x.foo()
 Bar.test''',
             [ident('x'), dot, ident('foo'), lparen, rparen, newline,
              ident('Bar'), dot, ident('test'), newline])
+
+    def test_list(self):
+        self.assert_tokens(
+            '''
+x = [1, 2, 'hello', foo(),
+    x]''',
+            [ident('x'), assign, lbracket, num(1), comma, num(2), comma,
+             string('hello'), comma, ident('foo'), lparen, rparen, comma,
+             ident('x'), rbracket, newline])
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)

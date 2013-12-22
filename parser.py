@@ -2,7 +2,8 @@ from ply import yacc
 from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
                       Seq, ExpressionStatement, PrintStatement, IfStatement,
                       WhileStatement, DefStatement, FunctionCall,
-                      ClassStatement, PassStatement, AttributeAccess)
+                      ClassStatement, PassStatement, AttributeAccess,
+                      ListLiteral)
 import lexer
 
 
@@ -126,17 +127,21 @@ class Parser(object):
         """expression : STRING"""
         p[0] = Literal(Value(self.type_context.str_type, p[1], {}))
 
+    def p_list_literal(self, p):
+        """expression : LBRACKET exprlist RBRACKET"""
+        p[0] = ListLiteral(p[2])
+
     def p_variable(self, p):
         """expression : ID"""
         p[0] = Variable(p[1])
 
     def p_function_call(self, p):
-        """expression : expression LPAREN arglist RPAREN"""
+        """expression : expression LPAREN exprlist RPAREN"""
         p[0] = FunctionCall(p[1], p[3])
 
     # List of comma-separated expressions
-    def p_arglist(self, p):
-        """arglist : expression COMMA arglist
+    def p_exprlist(self, p):
+        """exprlist : expression COMMA exprlist
                    | expression
                    |
         """

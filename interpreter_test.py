@@ -163,10 +163,8 @@ instance = SimpleClass()
 instance.x = 5
 print instance.x
 instance.reset_x()
-print instance.x
-''',
-            '5\n0\n'
-        )
+print instance.x''',
+            '5\n0\n')
 
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the

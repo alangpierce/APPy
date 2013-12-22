@@ -3,7 +3,8 @@ import unittest
 from appy_ast import (BinaryOperator, Literal, Value, ExpressionStatement,
                       PrintStatement, IfStatement, Assignment, Variable,
                       WhileStatement, DefStatement, FunctionCall, Seq,
-                      ClassStatement, PassStatement, AttributeAccess)
+                      ClassStatement, PassStatement, AttributeAccess,
+                      ListLiteral)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -165,6 +166,15 @@ print ('foo' + 'bar').capitalize()''',
                             '+', self.string_literal('foo'),
                             self.string_literal('bar')), 'capitalize'),
                         [])))))
+
+    def test_list_literal(self):
+        self.assert_ast(
+            'my_list = [1, 2, foo(x)]',
+            Assignment(Variable('my_list'), ListLiteral(
+                [self.int_literal(1),
+                 self.int_literal(2),
+                 FunctionCall(Variable('foo'), [Variable('x')])]))
+        )
 
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)

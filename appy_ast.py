@@ -70,6 +70,13 @@ class Literal(namedtuple('Literal', ['value'])):
         return self.value.pretty_print()
 
 
+class ListLiteral(namedtuple('ListLiteral', ['expressions'])):
+    def pretty_print(self):
+        return ('[' +
+                ','.join(expr.pretty_print() for expr in self.expressions) +
+                ']')
+
+
 class Variable(namedtuple('Variable', ['name'])):
     def pretty_print(self):
         return self.name
