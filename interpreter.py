@@ -160,8 +160,7 @@ class ExecutionEnvironment(object):
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
         op_function_value = self._evaluate_attribute(left_value, op_name)
-        return self._evaluate_function(
-            op_function_value, left_value, right_value)
+        return self._evaluate_function(op_function_value, right_value)
 
     def _evaluate_Literal(self, expression):
         return expression.value
@@ -187,10 +186,23 @@ class ExecutionEnvironment(object):
             return object_value.attributes[attribute_name]
         except KeyError:
             try:
-                return object_value.type.attributes[attribute_name]
+                # Functions seem to automatically have __get__, so hard-code
+                # that for now.
+                # TODO: Full descriptor support
+                attr = object_value.type.attributes[attribute_name]
+                if attr.type is self.type_context.function_type:
+                    return self._bind_instance_to_method(object_value, attr)
+                else:
+                    return attr
             except KeyError:
                 raise TypeError('Attribute ' + attribute_name +
                                 ' does not exist on this type.')
+
+    def _bind_instance_to_method(self, obj, method):
+        return Value(
+            self.type_context.function_type,
+            lambda *args: self._evaluate_function(method, obj, *args),
+            {})
 
     def _evaluate_function(self, func, *args):
         """
