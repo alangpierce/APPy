@@ -139,7 +139,33 @@ class Foo(object):
 x = Foo()
 x.bar = 5
 print x.bar''',
-            '5\n'
+            '5\n')
+
+    def test_class_method(self):
+        self.assert_execute(
+            '''
+class Foo(object):
+    def bar(self):
+        print 'Hello'
+
+x = Foo()
+x.bar()''',
+            'Hello\n')
+
+    def test_class_data(self):
+        self.assert_execute(
+            '''
+class SimpleClass(object):
+    def reset_x(self):
+        self.x = 0
+
+instance = SimpleClass()
+instance.x = 5
+print instance.x
+instance.reset_x()
+print instance.x
+''',
+            '5\n0\n'
         )
 
     def assert_evaluate(self, program, expected_value):

@@ -1,4 +1,3 @@
-from twisted.python.reflect import fullFuncName
 from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
                       Assignment, Variable, IfStatement, WhileStatement,
                       DefStatement, FunctionData, FunctionCall, ClassStatement,
@@ -147,9 +146,12 @@ class ExecutionEnvironment(object):
     def _execute_ClassStatement(self, statement):
         assert isinstance(statement, ClassStatement)
         # TODO: Use the superclass.
-        # TODO: Eagerly execute class body, assign variables to class
-        # attrs.
-        new_type = Value(self.type_context.type_type, statement.name, {})
+        class_scope = self.scope_chain.with_pushed_mappings({})
+        new_environment = ExecutionEnvironment(
+            self.stdout_handler, self.type_context, class_scope)
+        new_environment.execute_statement(statement.body)
+        new_type = Value(self.type_context.type_type, statement.name,
+                         class_scope.mappings)
         self.scope_chain.assign_name(statement.name, new_type)
 
     BINARY_OPERATORS = {
