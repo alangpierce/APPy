@@ -89,9 +89,13 @@ class AttributeAccess(namedtuple('AttributeAccess', ['expr', 'attr_name'])):
 class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
     """
     * type is a pointer to the type.
-    * data refers to the "raw" data contained in this type, such as an
-    int, string, or AST. Only primitive-like objects have a value here.
-    * attributes is a dictionary of the direct attributes of the object.
+    * data refers to the "raw" data contained in this type:
+      -primitives have a a Python primitive with their value
+      -functions have either an AST of the function (for user-defined
+        functions) or a Python function (for builtin functions).
+      -types have a string with the name of the type
+    * attributes is a dictionary of the direct attributes of the
+        object, each of which has type Value.
     """
     def pretty_print(self):
         return str(self.data)

@@ -128,8 +128,19 @@ def bar():
     x = 5
     foo()
 
-bar()
-''')
+bar()''')
+
+    def test_class_attributes(self):
+        self.assert_execute(
+            '''
+class Foo(object):
+    pass
+
+x = Foo()
+x.bar = 5
+print x.bar''',
+            '5\n'
+        )
 
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the

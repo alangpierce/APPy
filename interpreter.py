@@ -1,6 +1,8 @@
+from twisted.python.reflect import fullFuncName
 from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
                       Assignment, Variable, IfStatement, WhileStatement,
-                      DefStatement, FunctionData, FunctionCall)
+                      DefStatement, FunctionData, FunctionCall, ClassStatement,
+                      AttributeAccess)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -67,6 +69,9 @@ class ExecutionEnvironment(object):
         return method(statement)
 
     def evaluate_expression(self, expression):
+        '''
+        @rtype: Value
+        '''
         try:
             method = getattr(
                 self, '_evaluate_' + expression.__class__.__name__)
@@ -75,11 +80,15 @@ class ExecutionEnvironment(object):
                 'Missing handler for expression ' + str(expression))
         return method(expression)
 
-
-    # An "assignable", a.k.a. an lvalue, is an expression that is valid on
-    # the left side of an assignment. Assignables are still of type
-    # expression, but only some expressions are valid assignables.
-    def resolve_assignable(self, expression):
+    def _resolve_assign_function(self, expression):
+        """
+        An "assignable", a.k.a. an lvalue, is an expression that is
+        valid on the left side of an assignment. This method returns a
+        function that takes a Value and assigns it to the appropriate
+        place.
+        @param expression: An assignable expression.
+        @rtype Value -> NoneType
+        """
         try:
             method = getattr(self, '_resolve_' + expression.__class__.__name__)
         except AttributeError:
@@ -97,12 +106,8 @@ class ExecutionEnvironment(object):
     def _execute_Assignment(self, statement):
         assert isinstance(statement, Assignment)
         value = self.evaluate_expression(statement.right)
-        assignable = self.resolve_assignable(statement.left)
-        if isinstance(assignable, Variable):
-            self.scope_chain.assign_name(assignable.name, value)
-        else:
-            raise NotImplementedError('Unexpected assignable type: ' +
-                                      assignable.__class__.__name__)
+        assign_function = self._resolve_assign_function(statement.left)
+        assign_function(value)
 
     def _execute_ExpressionStatement(self, statement):
         assert isinstance(statement, ExpressionStatement)
@@ -139,6 +144,14 @@ class ExecutionEnvironment(object):
                 statement.param_names, statement.body, self.scope_chain),
             {}))
 
+    def _execute_ClassStatement(self, statement):
+        assert isinstance(statement, ClassStatement)
+        # TODO: Use the superclass.
+        # TODO: Eagerly execute class body, assign variables to class
+        # attrs.
+        new_type = Value(self.type_context.type_type, statement.name, {})
+        self.scope_chain.assign_name(statement.name, new_type)
+
     BINARY_OPERATORS = {
         '+': '__add__',
         '-': '__sub__',
@@ -159,7 +172,7 @@ class ExecutionEnvironment(object):
         op_name = self.BINARY_OPERATORS[expression.operator]
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
-        op_function_value = self._evaluate_attribute(left_value, op_name)
+        op_function_value = self._evaluate_attr_on_type(left_value, op_name)
         return self._evaluate_function(op_function_value, right_value)
 
     def _evaluate_Literal(self, expression):
@@ -175,7 +188,12 @@ class ExecutionEnvironment(object):
         arg_values = [self.evaluate_expression(arg) for arg in expression.args]
         return self._evaluate_function(function_value, *arg_values)
 
-    def _evaluate_attribute(self, object_value, attribute_name):
+    def _evaluate_AttributeAccess(self, expression):
+        assert isinstance(expression, AttributeAccess)
+        obj = self.evaluate_expression(expression.expr)
+        return self._evaluate_attr(obj, expression.attr_name)
+
+    def _evaluate_attr(self, object_value, attribute_name):
         """
         Resolves an attribute on the given object, which includes
         checking attributes on the type and supertypes if necessary.
@@ -185,18 +203,21 @@ class ExecutionEnvironment(object):
         try:
             return object_value.attributes[attribute_name]
         except KeyError:
-            try:
-                # Functions seem to automatically have __get__, so hard-code
-                # that for now.
-                # TODO: Full descriptor support
-                attr = object_value.type.attributes[attribute_name]
-                if attr.type is self.type_context.function_type:
-                    return self._bind_instance_to_method(object_value, attr)
-                else:
-                    return attr
-            except KeyError:
-                raise TypeError('Attribute ' + attribute_name +
-                                ' does not exist on this type.')
+            return self._evaluate_attr_on_type(object_value, attribute_name)
+
+    def _evaluate_attr_on_type(self, object_value, attribute_name):
+        try:
+            # Functions seem to automatically have __get__, so hard-code
+            # that for now.
+            # TODO: Full descriptor support
+            attr = object_value.type.attributes[attribute_name]
+            if attr.type is self.type_context.function_type:
+                return self._bind_instance_to_method(object_value, attr)
+            else:
+                return attr
+        except KeyError:
+            raise TypeError('Attribute ' + attribute_name +
+                            ' does not exist on this type.')
 
     def _bind_instance_to_method(self, obj, method):
         return Value(
@@ -211,6 +232,13 @@ class ExecutionEnvironment(object):
         @type args: should only contain elements of type Value
         @type func: Value
         """
+        while func.type is not self.type_context.function_type:
+            try:
+                func = self._evaluate_attr_on_type(func, '__call__')
+            except TypeError:
+                raise TypeError("'%s' object is not callable" %
+                                str(func.type.data))
+
         # Built-in functions use a regular python function.
         # User-defined functions use a FunctionData structure.
         data = func.data
@@ -224,5 +252,13 @@ class ExecutionEnvironment(object):
         else:
             return data(*args)
 
-    def _resolve_Variable(self, expression):
-        return expression
+    def _resolve_Variable(self, assignable):
+        assert isinstance(assignable, Variable)
+        return lambda val: self.scope_chain.assign_name(assignable.name, val)
+
+    def _resolve_AttributeAccess(self, assignable):
+        assert isinstance(assignable, AttributeAccess)
+        obj = self.evaluate_expression(assignable.expr)
+        def assign(val):
+            obj.attributes[assignable.attr_name] = val
+        return assign

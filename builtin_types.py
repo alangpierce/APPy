@@ -5,10 +5,10 @@ class TypeContext(object):
 
     def __init__(self):
         self.type_type = create_type_type_value()
-        self.function_type = Value(self.type_type, None, {})
-        self.int_type = Value(self.type_type, None, {})
-        self.str_type = Value(self.type_type, None, {})
-        self.bool_type = Value(self.type_type, None, {})
+        self.function_type = Value(self.type_type, "function", {})
+        self.int_type = Value(self.type_type, "int", {})
+        self.str_type = Value(self.type_type, "str", {})
+        self.bool_type = Value(self.type_type, "bool", {})
 
         # We build empty types up front, then populate them, so that we
         # can refer to the types within builtin functions.
@@ -38,7 +38,7 @@ class TypeContext(object):
                 return Value(self.str_type, arg1.data * arg2.data, {})
             else:
                 raise "Unexpected second arg type: " + str(arg2.type)
-        self.int_type.attributes['__mul__'] =\
+        self.int_type.attributes['__mul__'] = \
             self._make_function(dynamic_multiply)
 
         for name, func in [('__eq__', lambda a, b: a == b),
@@ -48,6 +48,11 @@ class TypeContext(object):
                            ('__le__', lambda a, b: a <= b),
                            ('__ge__', lambda a, b: a >= b)]:
             self._define_primitive_func(func, 'bool', 'int', name, 'int')
+
+        def type_constructor(class_value):
+            return Value(class_value, None, {})
+        self.type_type.attributes['__call__'] = self._make_function(
+            type_constructor)
 
     def _define_primitive_func(self, func, return_type_name, base_type_name,
                                func_name, *arg_type_names):
