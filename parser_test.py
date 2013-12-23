@@ -4,7 +4,7 @@ from appy_ast import (BinaryOperator, Literal, Value, ExpressionStatement,
                       PrintStatement, IfStatement, Assignment, Variable,
                       WhileStatement, DefStatement, FunctionCall, Seq,
                       ClassStatement, PassStatement, AttributeAccess,
-                      ListLiteral)
+                      ListLiteral, GetItem)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -143,7 +143,7 @@ foo = Blah()''',
             Seq(ClassStatement('Blah', Variable('object'),
                                Assignment(Variable('x'), self.int_literal(5))),
                 Assignment(Variable('foo'), FunctionCall(Variable('Blah'), []))
-            )
+                )
         )
 
     def test_attribute_access(self):
@@ -173,8 +173,16 @@ print ('foo' + 'bar').capitalize()''',
             Assignment(Variable('my_list'), ListLiteral(
                 [self.int_literal(1),
                  self.int_literal(2),
-                 FunctionCall(Variable('foo'), [Variable('x')])]))
-        )
+                 FunctionCall(Variable('foo'), [Variable('x')])])))
+
+    def test_list_access(self):
+        self.assert_ast(
+            'my_list[foo() + 3]',
+            ExpressionStatement(
+                GetItem(Variable('my_list'),
+                        BinaryOperator('+',
+                                       FunctionCall(Variable('foo'), []),
+                                       self.int_literal(3)))))
 
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)

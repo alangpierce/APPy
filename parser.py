@@ -3,7 +3,7 @@ from appy_ast import (BinaryOperator, Literal, Value, Assignment, Variable,
                       Seq, ExpressionStatement, PrintStatement, IfStatement,
                       WhileStatement, DefStatement, FunctionCall,
                       ClassStatement, PassStatement, AttributeAccess,
-                      ListLiteral)
+                      ListLiteral, GetItem)
 import lexer
 
 
@@ -112,6 +112,10 @@ class Parser(object):
     def p_attribute_access(self, p):
         """expression : expression DOT ID"""
         p[0] = AttributeAccess(p[1], p[3])
+
+    def p_getitem(self, p):
+        """expression : expression LBRACKET expression RBRACKET"""
+        p[0] = GetItem(p[1], p[3])
 
     def p_int_literal(self, p):
         """expression : NUMBER"""

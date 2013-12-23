@@ -167,6 +167,15 @@ x = [1, 2, 'hello', foo(),
              string('hello'), comma, ident('foo'), lparen, rparen, comma,
              ident('x'), rbracket, newline])
 
+    def test_list_indexing(self):
+        self.assert_tokens(
+            '''
+print x[5]
+y[foo()] = 7''',
+            [print_token, ident('x'), lbracket, num(5), rbracket, newline,
+             ident('y'), lbracket, ident('foo'), lparen, rparen, rbracket,
+             assign, num(7), newline])
+
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)
         self.assertEqual(expected_tokens,

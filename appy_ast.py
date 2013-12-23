@@ -1,5 +1,4 @@
 from collections import namedtuple
-from scope import ScopeChain
 
 
 class Seq(namedtuple('Seq', ['left', 'right'])):
@@ -91,6 +90,11 @@ class FunctionCall(namedtuple('FunctionCall', ['function_expr', 'args'])):
 class AttributeAccess(namedtuple('AttributeAccess', ['expr', 'attr_name'])):
     def pretty_print(self):
         return self.expr.pretty_print() + '.' + self.attr_name
+
+
+class GetItem(namedtuple('GetItem', ['expr', 'key'])):
+    def pretty_print(self):
+        return self.expr.pretty_print() + '[' + self.key.pretty_print() + ']'
 
 
 class Value(namedtuple('Value', ['type', 'data', 'attributes'])):
