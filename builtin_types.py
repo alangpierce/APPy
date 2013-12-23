@@ -9,6 +9,7 @@ class TypeContext(object):
         self.int_type = Value(self.type_type, "int", {})
         self.str_type = Value(self.type_type, "str", {})
         self.bool_type = Value(self.type_type, "bool", {})
+        self.list_type = Value(self.type_type, 'list', {})
 
         # We build empty types up front, then populate them, so that we
         # can refer to the types within builtin functions.
@@ -53,6 +54,14 @@ class TypeContext(object):
             return Value(class_value, None, {})
         self.type_type.attributes['__call__'] = self._make_function(
             type_constructor)
+
+        def list_getattr(list_value, index):
+            if index.type is not self.int_type:
+                raise TypeError('list indices must be integers, not ' +
+                                index.type.data)
+            return list_value.data[index.data]
+        self.list_type.attributes['__getitem__'] = self._make_function(
+            list_getattr)
 
     def _define_primitive_func(self, func, return_type_name, base_type_name,
                                func_name, *arg_type_names):

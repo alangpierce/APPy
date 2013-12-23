@@ -166,6 +166,13 @@ instance.reset_x()
 print instance.x''',
             '5\n0\n')
 
+    def test_list_literal(self):
+        self.assert_execute(
+            '''
+my_list = [5, 2, 8, 3]
+print my_list[1]''',
+            '2\n')
+
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the
         # type, which it probably shouldn't do.

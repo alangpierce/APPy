@@ -1,7 +1,7 @@
 from appy_ast import (Value, ExpressionStatement, PrintStatement, Seq,
                       Assignment, Variable, IfStatement, WhileStatement,
                       DefStatement, FunctionData, FunctionCall, ClassStatement,
-                      AttributeAccess)
+                      AttributeAccess, ListLiteral, GetItem)
 from builtin_types import TypeContext
 from lexer import create_lexer
 from parser import Parser
@@ -180,6 +180,12 @@ class ExecutionEnvironment(object):
     def _evaluate_Literal(self, expression):
         return expression.value
 
+    def _evaluate_ListLiteral(self, expression):
+        assert isinstance(expression, ListLiteral)
+        result_values = [
+            self.evaluate_expression(expr) for expr in expression.expressions]
+        return Value(self.type_context.list_type, result_values, {})
+
     def _evaluate_Variable(self, expression):
         assert isinstance(expression, Variable)
         return self.scope_chain.resolve_name(expression.name)
@@ -194,6 +200,13 @@ class ExecutionEnvironment(object):
         assert isinstance(expression, AttributeAccess)
         obj = self.evaluate_expression(expression.expr)
         return self._evaluate_attr(obj, expression.attr_name)
+
+    def _evaluate_GetItem(self, expression):
+        assert isinstance(expression, GetItem)
+        obj_value = self.evaluate_expression(expression.expr)
+        method_value = self._evaluate_attr_on_type(obj_value, '__getitem__')
+        key_value = self.evaluate_expression(expression.key)
+        return self._evaluate_function(method_value, key_value)
 
     def _evaluate_attr(self, object_value, attribute_name):
         """
