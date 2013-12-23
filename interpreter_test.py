@@ -173,6 +173,15 @@ my_list = [5, 2, 8, 3]
 print my_list[1]''',
             '2\n')
 
+    def test_list_assignment(self):
+        self.assert_execute(
+            '''
+my_list = [5, 8, 1]
+print my_list[0]
+my_list[0] = 12
+print my_list[0]''',
+            '5\n12\n')
+
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the
         # type, which it probably shouldn't do.

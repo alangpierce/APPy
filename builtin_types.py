@@ -55,13 +55,21 @@ class TypeContext(object):
         self.type_type.attributes['__call__'] = self._make_function(
             type_constructor)
 
-        def list_getattr(list_value, index):
+        def list_getitem(list_value, index):
             if index.type is not self.int_type:
                 raise TypeError('list indices must be integers, not ' +
                                 index.type.data)
             return list_value.data[index.data]
         self.list_type.attributes['__getitem__'] = self._make_function(
-            list_getattr)
+            list_getitem)
+
+        def list_setitem(list_value, index, value):
+            if index.type is not self.int_type:
+                raise TypeError('list indices must be integers, not ' +
+                                index.type.data)
+            list_value.data[index.data] = value
+        self.list_type.attributes['__setitem__'] = self._make_function(
+            list_setitem)
 
     def _define_primitive_func(self, func, return_type_name, base_type_name,
                                func_name, *arg_type_names):

@@ -184,6 +184,14 @@ print ('foo' + 'bar').capitalize()''',
                                        FunctionCall(Variable('foo'), []),
                                        self.int_literal(3)))))
 
+    def test_list_assignment(self):
+        self.assert_ast(
+            'arr[3] = 5',
+            Assignment(
+                GetItem(Variable('arr'), self.int_literal(3)),
+                self.int_literal(5))
+        )
+
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)
         self.assertEqual(expected_ast, actual_ast,

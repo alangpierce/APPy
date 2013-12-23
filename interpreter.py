@@ -273,7 +273,18 @@ class ExecutionEnvironment(object):
 
     def _resolve_AttributeAccess(self, assignable):
         assert isinstance(assignable, AttributeAccess)
-        obj = self.evaluate_expression(assignable.expr)
+
         def assign(val):
+            obj = self.evaluate_expression(assignable.expr)
             obj.attributes[assignable.attr_name] = val
+        return assign
+
+    def _resolve_GetItem(self, assignable):
+        assert isinstance(assignable, GetItem)
+
+        def assign(val):
+            obj = self.evaluate_expression(assignable.expr)
+            method = self._evaluate_attr_on_type(obj, '__setitem__')
+            key = self.evaluate_expression(assignable.key)
+            self._evaluate_function(method, key, val)
         return assign
