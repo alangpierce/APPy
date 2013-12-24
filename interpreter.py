@@ -77,7 +77,8 @@ class ExecutionEnvironment(object):
         except AttributeError:
             raise NotImplementedError(
                 'Missing handler for expression ' + str(expression))
-        return method(expression)
+        result = method(expression)
+        return result
 
     def _resolve_assign_function(self, expression):
         """
@@ -171,11 +172,19 @@ class ExecutionEnvironment(object):
     }
 
     def _evaluate_BinaryOperator(self, expression):
+        if expression.operator == 'is':
+            return self._evaluate_is(expression.left, expression.right)
+
         op_name = self.BINARY_OPERATORS[expression.operator]
         left_value = self.evaluate_expression(expression.left)
         right_value = self.evaluate_expression(expression.right)
         op_function_value = self._evaluate_attr_on_type(left_value, op_name)
         return self._evaluate_function(op_function_value, right_value)
+
+    def _evaluate_is(self, left, right):
+        left_value = self.evaluate_expression(left)
+        right_value = self.evaluate_expression(right)
+        return self.type_context.bool_value(left_value is right_value)
 
     def _evaluate_Literal(self, expression):
         return expression.value

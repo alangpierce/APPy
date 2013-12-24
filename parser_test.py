@@ -222,13 +222,13 @@ if x is None:
         return Literal(Value(self.type_context.int_type, int_value, {}))
 
     def none_literal(self):
-        return Literal(Value(self.type_context.none_type, None, {}))
+        return Literal(self.type_context.none_value)
 
     def string_literal(self, string_value):
         return Literal(Value(self.type_context.str_type, string_value, {}))
 
     def bool_literal(self, bool_value):
-        return Literal(Value(self.type_context.bool_type, bool_value, {}))
+        return Literal(self.type_context.bool_value(bool_value))
 
 
 if __name__ == '__main__':

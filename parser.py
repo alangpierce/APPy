@@ -126,11 +126,11 @@ class Parser(object):
         """expression : TRUE
                       | FALSE
         """
-        p[0] = Literal(Value(self.type_context.bool_type, p[1], {}))
+        p[0] = Literal(self.type_context.bool_value(p[1]))
 
     def p_none_literal(self, p):
         """expression : NONE"""
-        p[0] = Literal(Value(self.type_context.none_type, None, {}))
+        p[0] = Literal(self.type_context.none_value)
 
     def p_string_literal(self, p):
         """expression : STRING"""

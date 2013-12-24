@@ -182,6 +182,26 @@ my_list[0] = 12
 print my_list[0]''',
             '5\n12\n')
 
+    def test_none(self):
+        self.assert_execute(
+            '''
+x = None
+if x is None:
+    print "x was none"''',
+            'x was none\n')
+
+    def test_canonical_values(self):
+        self.assert_execute(
+            '''
+def print_if_true(b):
+    if b:
+        print '!'
+print_if_true((False or False) is False)
+print_if_true(None is None)
+print_if_true(True is (True and True))
+print_if_true((True is True) is True)''',
+            '!\n!\n!\n!\n')
+
     def assert_evaluate(self, program, expected_value):
         # TODO: I'm pretty sure this is doing deep equality on the
         # type, which it probably shouldn't do.

@@ -12,6 +12,11 @@ class TypeContext(object):
         self.bool_type = Value(self.type_type, "bool", {})
         self.list_type = Value(self.type_type, 'list', {})
 
+        # We need these to be canonical
+        self.none_value = Value(self.none_type, None, {})
+        self.true_value = Value(self.bool_type, True, {})
+        self.false_value = Value(self.bool_type, False, {})
+
         # We build empty types up front, then populate them, so that we
         # can refer to the types within builtin functions.
         self._define_primitive_func(
@@ -52,7 +57,7 @@ class TypeContext(object):
             self._define_primitive_func(func, 'bool', 'int', name, 'int')
 
         def type_constructor(class_value):
-            return Value(class_value, None, {})
+            return self._make_value(class_value, None, {})
         self.type_type.attributes['__call__'] = self._make_function(
             type_constructor)
 
@@ -71,6 +76,13 @@ class TypeContext(object):
             list_value.data[index.data] = value
         self.list_type.attributes['__setitem__'] = self._make_function(
             list_setitem)
+
+    def bool_value(self, b):
+        assert isinstance(b, bool)
+        if b:
+            return self.true_value
+        else:
+            return self.false_value
 
     def _define_primitive_func(self, func, return_type_name, base_type_name,
                                func_name, *arg_type_names):
@@ -92,8 +104,19 @@ class TypeContext(object):
 
             result_data = primitive_function(
                 *(arg.data for arg in result_args))
-            return Value(return_type, result_data, {})
+            return self._make_value(return_type, result_data, {})
         return self._make_function(result_fun)
+
+    def _make_value(self, type, data, attributes):
+        """This must be called whenever a value is created that could
+        be a bool or None.
+        """
+        if type is self.bool_type:
+            return self.bool_value(data)
+        elif type is self.none_type:
+            return self.none_value
+        else:
+            return Value(type, data, attributes)
 
     # Note that this method should not be called in __init__ until the
     # function_type attribute has been set.
