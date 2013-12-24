@@ -192,6 +192,18 @@ print ('foo' + 'bar').capitalize()''',
                 self.int_literal(5))
         )
 
+    def test_none(self):
+        self.assert_ast(
+            '''
+x = None
+if x is None:
+    pass''',
+            Seq(
+                Assignment(Variable('x'), self.none_literal()),
+                IfStatement(
+                    BinaryOperator('is', Variable('x'), self.none_literal()),
+                    PassStatement())))
+
     def assert_ast(self, program, expected_ast):
         actual_ast = self.get_ast(program)
         self.assertEqual(expected_ast, actual_ast,
@@ -208,6 +220,9 @@ print ('foo' + 'bar').capitalize()''',
 
     def int_literal(self, int_value):
         return Literal(Value(self.type_context.int_type, int_value, {}))
+
+    def none_literal(self):
+        return Literal(Value(self.type_context.none_type, None, {}))
 
     def string_literal(self, string_value):
         return Literal(Value(self.type_context.str_type, string_value, {}))

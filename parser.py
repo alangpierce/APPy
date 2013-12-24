@@ -96,6 +96,7 @@ class Parser(object):
                       | expression DIVIDEDBY expression
                       | expression EQUALS expression
                       | expression NOTEQUAL expression
+                      | expression IS expression
                       | expression LESSTHAN expression
                       | expression GREATERTHAN expression
                       | expression LESSTHANOREQUAL expression
@@ -126,6 +127,10 @@ class Parser(object):
                       | FALSE
         """
         p[0] = Literal(Value(self.type_context.bool_type, p[1], {}))
+
+    def p_none_literal(self, p):
+        """expression : NONE"""
+        p[0] = Literal(Value(self.type_context.none_type, None, {}))
 
     def p_string_literal(self, p):
         """expression : STRING"""

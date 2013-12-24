@@ -7,6 +7,7 @@ class TypeContext(object):
         self.type_type = create_type_type_value()
         self.function_type = Value(self.type_type, "function", {})
         self.int_type = Value(self.type_type, "int", {})
+        self.none_type = Value(self.type_type, 'NoneType', {})
         self.str_type = Value(self.type_type, "str", {})
         self.bool_type = Value(self.type_type, "bool", {})
         self.list_type = Value(self.type_type, 'list', {})

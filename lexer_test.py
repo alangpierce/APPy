@@ -22,6 +22,8 @@ def string(s):
     return ('STRING', s)
 if_token = ('IF', 'if')
 while_token = ('WHILE', 'while')
+none = ('NONE', 'None')
+is_token = ('IS', 'is')
 colon = ('COLON', ':')
 comma = ('COMMA', ',')
 newline = ('NEWLINE', '')
@@ -175,6 +177,15 @@ y[foo()] = 7''',
             [print_token, ident('x'), lbracket, num(5), rbracket, newline,
              ident('y'), lbracket, ident('foo'), lparen, rparen, rbracket,
              assign, num(7), newline])
+
+    def test_none(self):
+        self.assert_tokens(
+            '''
+x = None
+if x is None:
+    pass''',
+            [ident('x'), assign, none, newline, if_token, ident('x'), is_token,
+             none, colon, newline, indent, pass_token, newline, dedent])
 
     def assert_tokens(self, program, expected_tokens):
         tokens = self.get_tokens(program)
